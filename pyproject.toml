@@ -33,6 +33,7 @@ vcs = [
 notebook = [
     "jupyter>=1.0.0",
     "pandas>=2.1.0",
+    "nbstripout>=0.6.1",
 ]
 
 visualization = [
