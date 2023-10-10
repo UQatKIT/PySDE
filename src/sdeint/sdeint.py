@@ -139,6 +139,7 @@ class EulerMaruyamaScheme:
 
 # ================================= Integrator with Fixed Stepsize =================================
 class StaticIntegrator:
+    
     # ----------------------------------------------------------------------------------------------
     def __init__(self, scheme: Any, result_storage: Any) -> None:
         self._scheme = scheme
