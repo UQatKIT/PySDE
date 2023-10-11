@@ -21,33 +21,21 @@ class StochasticIntegralGenerator:
         )
         return single_integral
 
-    # ----------------------------------------------------------------------------------------------
-    def compute_double(self, step_size: float, num_trajectories: int) -> np.ndarray:
-        raise NotImplementedError("Double integral is not implemented for this class")
-
 
 # ===================================== Simple Result Storage ======================================
 class SimpleStorage:
     # ----------------------------------------------------------------------------------------------
     def __init__(self) -> None:
-        self._result_array = None
+        self._result_list = []
 
     # ----------------------------------------------------------------------------------------------
-    def set_up_storage(self, num_components: int, num_trajectories: int, num_steps: int) -> None:
-        self._result_array = np.zeros((num_components, num_trajectories, num_steps))
+    def append(self, result: np.ndarray) -> None:
+        self._result_list.append(result)
 
     # ----------------------------------------------------------------------------------------------
-    def store_result(self, result: np.ndarray, time_index: int) -> None:
-        self._result_array[:, :, time_index] = result
-
-    # ----------------------------------------------------------------------------------------------
-    def get_result(self, time_index: int) -> np.ndarray:
-        result = self._result_array[:, :, time_index]
-        return result
-
-    # ----------------------------------------------------------------------------------------------
-    def return_result_data(self):
-        return self._result_array
+    def get(self) -> np.ndarray:
+        result_array = np.stack(self._result_list, axis=2)
+        return result_array
 
 
 # ================================= Persistent Chunkwise Storage ===================================
@@ -56,62 +44,31 @@ class PersistentChunkwiseStorage:
     def __init__(self, chunk_size: int, save_directory: str) -> None:
         self._chunk_size = chunk_size
         self._save_directory = save_directory
-        self._num_components = None
-        self._num_trajectories = None
-        self._num_steps = None
-        self._result_array = None
+        self._result_list = []
         self._zarr_storage = None
-        self._storage_chunk_sizes = None
 
     # ----------------------------------------------------------------------------------------------
-    def set_up_storage(self, num_components: int, num_trajectories: int, num_steps: int) -> None:
-        self._num_components = num_components
-        self._num_trajectories = num_trajectories
-        self._num_steps = num_steps
-        self._zarr_storage = zarr.open(
-            f"{self._save_directory}.zarr",
-            mode="w",
-            shape=(num_components, num_trajectories, num_steps),
-        )
-        self._storage_chunk_sizes = self._define_chunks(num_steps)
+    def append(self, result: np.ndarray) -> None:
+        self._result_list.append(result)
+        if len(self._result_list) == self._chunk_size:
+            self._save_to_file()
+            self._result_list = []
 
     # ----------------------------------------------------------------------------------------------
-    def store_result(self, result: np.ndarray, time_index: int) -> None:
-        chunk_num = int(np.floor(time_index / self._chunk_size))
-        time_index_chunk = time_index % self._chunk_size
-        if time_index_chunk == 0:
-            self._result_array = np.zeros(
-                (self._num_components, self._num_trajectories, self._storage_chunk_sizes[chunk_num])
-            )
-        self._result_array[:, :, time_index_chunk] = result
-        if time_index_chunk == (self._storage_chunk_sizes[chunk_num] - 1):
-            self._save_result_to_file(self._result_array, chunk_num)
-
-    # ----------------------------------------------------------------------------------------------
-    def get_result(self, time_index: int) -> np.ndarray:
-        time_index = time_index % self._chunk_size
-        result = self._result_array[:, :, time_index]
-        return result
-
-    # ----------------------------------------------------------------------------------------------
-    def return_result_data(self):
+    def get(self) -> zarr.Array:
+        if self._result_list:
+            self._save_to_file()
         return self._zarr_storage
 
     # ----------------------------------------------------------------------------------------------
-    def _define_chunks(self, num_steps: int) -> tuple[int]:
-        num_chunks = int(np.floor(num_steps / self._chunk_size))
-        if not (trailing_size := num_steps % self._chunk_size) == 0:
-            num_chunks += 1
-            chunk_sizes = (self._chunk_size,) * (num_chunks - 1) + (trailing_size,)
+    def _save_to_file(self) -> None:
+        result_array = np.stack(self._result_list, axis=2)
+        if self._zarr_storage is None:
+            self._zarr_storage = zarr.array(
+                result_array, store=f"{self._save_directory}.zarr", overwrite=True
+            )
         else:
-            chunk_sizes = (self._chunk_size,) * num_chunks
-        return chunk_sizes
-
-    # ----------------------------------------------------------------------------------------------
-    def _save_result_to_file(self, result_array: np.ndarray, chunk_num: int) -> None:
-        start_index = chunk_num * self._chunk_size
-        end_index = np.min((start_index + self._chunk_size, self._num_steps))
-        self._zarr_storage[..., start_index:end_index] = result_array
+            self._zarr_storage.append(result_array, axis=2)
 
 
 # ===================================== Euler-Maruyama Scheme ======================================
@@ -139,7 +96,6 @@ class EulerMaruyamaScheme:
 
 # ================================= Integrator with Fixed Stepsize =================================
 class StaticIntegrator:
-    
     # ----------------------------------------------------------------------------------------------
     def __init__(self, scheme: Any, result_storage: Any) -> None:
         self._scheme = scheme
@@ -150,16 +106,15 @@ class StaticIntegrator:
         self, start_time: float, step_size: float, num_steps: int, initial_state: np.ndarray
     ) -> tuple[np.ndarray, Any]:
         initial_state = reshape_initial_state(initial_state)
-        num_components, num_trajectories = initial_state.shape
         time_array = np.linspace(start_time, start_time + (num_steps - 1) * step_size, num_steps)
-        self._storage.set_up_storage(num_components, num_trajectories, num_steps)
-        self._storage.store_result(initial_state, 0)
+        self._storage.append(initial_state)
 
-        for i, current_time in enumerate(time_array[:-1]):
-            current_state = self._storage.get_result(i)
+        current_state = initial_state
+        for current_time in time_array[:-1]:
             next_state = self._scheme.compute_step(current_state, current_time, step_size)
-            self._storage.store_result(next_state, i + 1)
-        return time_array, self._storage.return_result_data()
+            self._storage.append(next_state)
+            current_state = next_state
+        return time_array, self._storage.get()
 
 
 # =========================================== Utilities ============================================
