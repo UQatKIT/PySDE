@@ -197,3 +197,5 @@ pyrightconfig.json
 #--- Additional Ignores ---
 .pdm-python
 *.zarr
+applications/*/
+examples/*/
