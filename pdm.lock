@@ -6,7 +6,7 @@ groups = ["default", "ruff", "style", "test", "pre-commit", "vcs", "mypy", "blac
 cross_platform = true
 static_urls = false
 lock_version = "4.3"
-content_hash = "sha256:5f1ef08c3f6661a24b66f91e5b915e9be676d46eae1180648342d9013234711f"
+content_hash = "sha256:444b525efe36b2e7048b723bcae44c845c41429b193175654a4228266c1153ed"
 
 [[package]]
 name = "anyio"
@@ -1992,6 +1992,19 @@ summary = "Traitlets Python configuration system"
 files = [
     {file = "traitlets-5.11.2-py3-none-any.whl", hash = "sha256:98277f247f18b2c5cabaf4af369187754f4fb0e85911d473f72329db8a7f4fae"},
     {file = "traitlets-5.11.2.tar.gz", hash = "sha256:7564b5bf8d38c40fa45498072bf4dc5e8346eb087bbf1e2ae2d8774f6a0f078e"},
+]
+
+[[package]]
+name = "typeguard"
+version = "4.1.5"
+requires_python = ">=3.8"
+summary = "Run-time type checker for Python"
+dependencies = [
+    "typing-extensions>=4.7.0; python_version < \"3.12\"",
+]
+files = [
+    {file = "typeguard-4.1.5-py3-none-any.whl", hash = "sha256:8923e55f8873caec136c892c3bed1f676eae7be57cdb94819281b3d3bc9c0953"},
+    {file = "typeguard-4.1.5.tar.gz", hash = "sha256:ea0a113bbc111bcffc90789ebb215625c963411f7096a7e9062d4e4630c155fd"},
 ]
 
 [[package]]

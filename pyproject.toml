@@ -14,12 +14,21 @@ authors = [
 requires-python = ">=3.11"
 dependencies = [
     "numpy>=1.25.2",
-    "zarr>=2.16.1",
     "tqdm>=4.66.1",
+    "typeguard>=4.1.5",
+    "zarr>=2.16.1"
 ]
 
 #---------------------------------------------------------------------------------------------------
 [project.optional-dependencies]
+notebook = [
+    "jupyter>=1.0.0",
+    "pandas>=2.1.0",
+    "nbstripout>=0.6.1",
+]
+parallel = [
+    "mpi4py>=3.1.5",
+]
 style = [
     "ruff>=0.0.292",
     "black>=23.9.1",
@@ -32,17 +41,10 @@ test = [
 vcs = [
     "pre-commit>=3.4.0",
 ]
-notebook = [
-    "jupyter>=1.0.0",
-    "pandas>=2.1.0",
-    "nbstripout>=0.6.1",
-]
 visualization = [
     "matplotlib>=3.8.0",
 ]
-parallel = [
-    "mpi4py>=3.1.5",
-]
+
 
 #---------------------------------------------------------------------------------------------------
 [build-system]
