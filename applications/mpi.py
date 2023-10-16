@@ -19,7 +19,7 @@ def main() -> None:
 
     # Settings for stochastic integral
     noise_dim = 2
-    seed = 0
+    seed = local_rank
 
     # Settings for storage
     save_directory = os.path.join("result_data_numpy", f"process_{local_rank}")
