@@ -1,12 +1,15 @@
 # =================================== Imports and Configuration ====================================
 from abc import ABC, abstractmethod
 from typing import final
+
 import numpy as np
+from typeguard import typechecked
 
 
 # ================================ Stochastic Integral Base Class ==================================
 class BaseStochasticIntegral(ABC):
     # ----------------------------------------------------------------------------------------------
+    @typechecked
     def __init__(self, noise_dim: int, seed: int) -> None:
         self._noise_dim = noise_dim
         self._rng = np.random.default_rng(seed)
