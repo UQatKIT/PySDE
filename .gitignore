@@ -199,3 +199,4 @@ pyrightconfig.json
 *.zarr
 applications/*/
 examples/*/
+.VSCodeCounter/
