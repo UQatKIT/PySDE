@@ -1,4 +1,15 @@
-"""_summary_."""
+"""Integration Schemes for SDEs.
+
+This module implements different integration schemes that can be employed within an integrator.
+Each scheme takes in the information of an SDE model and stochastic integegral generator, and
+provides a method for computing a single step in the numerical integration. All schemes have to be 
+derived from the `BaseScheme` class.
+
+Classes:
+    `BaseScheme`: Abstract base class for all integration schemes.
+    `ExplicitEulerMaruyamaScheme`: Explicit Euler-Maruyama scheme.
+"""
+
 # =================================== Imports and Configuration ====================================
 from abc import ABC, abstractmethod
 from collections.abc import Callable
@@ -14,15 +25,20 @@ sde_model_function = Callable[[np.ndarray, float | np.ndarray], np.ndarray]
 
 # ======================================== Scheme Base Class =======================================
 class BaseScheme(ABC):
-    """Abstract base class for implementing schemes for solving SDEs.
+    """Abstract base class for implementing schemes for numerical SDE integration.
 
     Attributes:
-        _variable_dim (int): The dimension of the variables in the SDE.
+        _variable_dim (int): The physical dimension of the variables in the SDE.
         _noise_dim (int): The dimension of the noise in the SDE.
         _drift (sde_model_function): The drift function of the SDE.
         _diffusion (sde_model_function): The diffusion function of the SDE.
         _stochastic_integral (stochastic_integrals.BaseStochasticIntegral):
             The stochastic integral used in the scheme.
+
+    Methods:
+        __init__(): Initializes the BaseScheme class.
+        compute_Step(): Abstract method defining the interface for single-step
+                        numerical integration.
     """
     # ----------------------------------------------------------------------------------------------
     @typechecked
@@ -35,6 +51,14 @@ class BaseScheme(ABC):
         stochastic_integral: stochastic_integrals.BaseStochasticIntegral,
     ) -> None:
         """Initializes the BaseScheme class.
+
+        Scheme classes take in the information of an SDE model and a 
+        stochastic integegral generator. If the scheme requires higher order stochastic integral,
+        it shhould implement checks if the provided integrator offers the required functionality.
+        Single integrals are guaranteed to be implemented by all classes derived from
+        BaseStochasticIntegral.
+
+        This method employs run-time type checking.
 
         Args:
             variable_dim (int): The dimension of the variables in the SDE.
@@ -50,6 +74,7 @@ class BaseScheme(ABC):
         self._diffusion = diffusion_function
         self._stochastic_integral = stochastic_integral
 
+
     # ----------------------------------------------------------------------------------------------
     @abstractmethod
     def compute_step(
@@ -58,7 +83,19 @@ class BaseScheme(ABC):
         current_time: float | np.ndarray,
         step_size: float | np.ndarray,
     ) -> np.ndarray:
-        """Abstract method that computes a single step of the scheme.
+        """Abstract method defining the interface for single-step numerical integration.
+
+        Given a current state, time and step size, this method propagates the SDE solution one
+        step forward. It has to be vectorized over different trajectories and ,for dynamics
+        dynamic integrators, over different times and step sizes for the different trajectories.
+        This is also part of the responsibility of the user-provided drift and diffusion functions.
+        The method `check_consistency`, which should be called by every integrator before a
+        simulation, tests drift/diffusion functions and initial condition for compatibility
+        with each other and the invoking integrator
+        `current state` is always a 2D array, where the first dimension is the physical dimension
+        of the solution variables, and the second dimension accounts for different trajectories.
+        For a static integrator, the current time and step size will be scalars. In the case of
+        dynamics integration, both will be 1xN arrays, where N is the number of trajectories.
 
         Args:
             current_state (np.ndarray): The current state of the SDE.
@@ -70,14 +107,21 @@ class BaseScheme(ABC):
         """
         pass
 
+
     # ----------------------------------------------------------------------------------------------
-    def check_consistency(self, initial_state: np.ndarray, static_steps: bool=True) -> None:
+    def check_consistency(self, initial_state: np.ndarray, static_steps: bool) -> None:
         """Checks the consistency of the scheme, initial state, and model functions.
+
+        This function tests the drift/diffusion functions and the initial condition for consistency
+        with the integrator that calls it. The user provided drift and diffusion functions must
+        produce output matching the variable and noise dimensions in their first dimension, and the
+        number of trajectories in their second dimension. In addition, for dynami integrators, as
+        indicated by the `static_steps` flag, the functions must work with 1xN time arrays, where N
+        is the number of trajectories.
 
         Args:
             initial_state (np.ndarray): The initial state of the SDE.
             static_steps (bool, optional): Whether the steps are static or dynamic.
-                                           Defaults to True.
 
         Raises:
             ValueError: If the initial state is not two-dimensional or has an incorrect size.
@@ -121,31 +165,9 @@ class BaseScheme(ABC):
 # ================================= Explicit Euler-Maruyama Scheme =================================
 @final
 class ExplicitEulerMaruyamaScheme(BaseScheme):
-    """A class that implements the explicit Euler-Maruyama scheme.
+    """A class that implements the explicit Euler-Maruyama one-step scheme.
 
-    Args:
-        variable_dim (int): The dimension of the variables in the SDE.
-        noise_dim (int): The dimension of the noise in the SDE.
-        drift_function (callable): The drift function of the SDE.
-        diffusion_function (callable): The diffusion function of the SDE.
-        stochastic_integral (StochasticIntegral): The stochastic integral used in the scheme.
-
-    Example Usage:
-        # Create an instance of the ExplicitEulerMaruyamaScheme class
-        scheme = ExplicitEulerMaruyamaScheme(variable_dim=2,
-                                             noise_dim=1,
-                                             drift_function=drift,
-                                             diffusion_function=diffusion,
-                                             stochastic_integral=integral)
-
-        # Compute a single step of the scheme
-        current_state = np.array([[1.0, 2.0]])
-        current_time = 0.0
-        step_size = 0.1
-        next_state = scheme.compute_step(current_state, current_time, step_size)
-
-        print(next_state)
-        # Output: [[1.1, 2.2]]
+    The scheme requires the provided stochastic integral only to compute single integrals.
     """
 
     # ----------------------------------------------------------------------------------------------
@@ -158,6 +180,8 @@ class ExplicitEulerMaruyamaScheme(BaseScheme):
     ) -> np.ndarray:
         """Computes a single step of the explicit Euler-Maruyama scheme for solving SDEs.
 
+        For a detailed description of arguments and return types, see the base class docstring.
+
         Args:
             current_state (np.ndarray): The current state of the SDE.
             current_time (float | np.ndarray): The current time of the SDE.
@@ -165,6 +189,9 @@ class ExplicitEulerMaruyamaScheme(BaseScheme):
 
         Returns:
             np.ndarray: The next state of the SDE.
+        
+        Raises:
+            AssertionError: If the shape of the next state does not match that of the current state.
         """
         num_trajectories = current_state.shape[1]
         random_incr = self._stochastic_integral.compute_single(
