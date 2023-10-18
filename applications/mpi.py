@@ -33,7 +33,7 @@ def main() -> None:
         return np.ones_like(current_state)
     
     # Execute Simulation
-    stochastic_integral = stochastic_integrals.DefaultStochasticIntegral(noise_dim, seed)
+    stochastic_integral = stochastic_integrals.ItoStochasticIntegral(noise_dim, seed)
     scheme = schemes.ExplicitEulerMaruyamaScheme(drift, diffusion, stochastic_integral)
     storage = storages.NumpyStorage(save_directory)
     integrator = integrators.StaticIntegrator(scheme, storage, show_progressbar)
