@@ -200,3 +200,4 @@ pyrightconfig.json
 applications/*/
 examples/*/
 .VSCodeCounter/
+.vscode/
