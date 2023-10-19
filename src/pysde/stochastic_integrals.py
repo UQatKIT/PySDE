@@ -4,8 +4,8 @@ This module implements the functionality for integration over Wiener processes, 
 random portion in SDEs. The integral objects are initialized with a seed for their intrinsic PRNG.
 
 Classes:
-    `BaseStochasticIntegral`: Abstract base class for a common interface
-    `ItoStochasticIntegral`: Implementation of Ito stochastic integrals
+    BaseStochasticIntegral: Abstract base class for a common interface
+    ItoStochasticIntegral: Implementation of Ito stochastic integrals
 """
 
 # =================================== Imports and Configuration ====================================
@@ -76,7 +76,8 @@ class ItoStochasticIntegral(BaseStochasticIntegral):
     def compute_single(self, noise_dim: int, step_size: float, num_trajectories: int) -> np.ndarray:
         """Computes a single stochastic integral of appropriate dimension for the given step size.
 
-        The RNG process is vectorized over the different trajectories.
+        The RNG process is vectorized over the different trajectories. Also note that as this is
+        a performance critical function, it does not check for the validity of the inputs.
 
         Args:
             noise_dim (int): The dimension of the noise.

@@ -6,8 +6,8 @@ provides a method for computing a single step in the numerical integration. All 
 derived from the `BaseScheme` class.
 
 Classes:
-    `BaseScheme`: Abstract base class for all integration schemes.
-    `ExplicitEulerMaruyamaScheme`: Explicit Euler-Maruyama scheme.
+    BaseScheme: Abstract base class for all integration schemes.
+    ExplicitEulerMaruyamaScheme: Explicit Euler-Maruyama scheme.
 """
 
 # =================================== Imports and Configuration ====================================

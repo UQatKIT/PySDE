@@ -1,21 +1,19 @@
 """Storage Objects for SDE Integration Results.
 
-Description:
-- Custom storage objects for storing SDE integration results.
-- Handle time and result data.
-- Common interface that can be leveraged by integrator classes, abstracting away different 
-  storage mechanisms
+This module provides custom storage objects for SDE integration results. They handle time and 
+result arrays. All storage objects provide a common interface that can be leveraged by integrator
+objects, abstracting away different storage mechanisms within the integration procedure.
 
 Classes:
-    `BaseStorage`: Abstract base class that provides a common interface for storage objects.
-    `NumpyStorage`: Storage relying on numpy file formats.
-    `ZarrChunkwiseStorage`: Storage relying on zarr file formats, allowing automatic chunkwise
-                            storage to disk for large simulations.
+    BaseStorage: Abstract base class that provides a common interface for storage objects.
+    NumpyStorage: Storage relying on numpy file formats.
+    ZarrChunkwiseStorage: Storage relying on zarr file formats, allowing automatic chunkwise
+                          storage to disk for large simulations.
 """
 # =================================== Imports and Configuration ====================================
 import pathlib
 from abc import ABC, abstractmethod
-from collections.abc import Collection
+from collections.abc import Iterable
 from typing import final
 
 import numpy as np
@@ -27,16 +25,17 @@ from typeguard import typechecked
 class BaseStorage(ABC):
     """Abstract base class that provides a common interface for storing time and result data.
 
-    This base class enforces a uniform interface on all storage objects, regardless of the 
+    This base class enforces a uniform interface on all storage objects, regardless of the
     respective storage mechanism. As a consequence, all storage objects can be used by any
-    integrator, inclusing dynamic integrators where the form of the result arrays is not known
+    integrator, inclusing dynamic integrators where the shape of the result arrays is not known
     a-priori.
 
     Methods:
         __init__(): Base class constructor.
-        append(): Appends a time and result data to the storage.
-        get(): Saves data to file and returns a numpy-like handle.
-        reset(): Resets the stored data.
+        append(): Appends time and result data to the storage.
+        reset(): Resets the data storage.
+        save(): Save the stored data to disk.
+        get(): Returns a numpy-like handle.
 
     Attributes:
         _save_directory (pathlib.Path | None): The directory where the data will be saved.
@@ -46,7 +45,7 @@ class BaseStorage(ABC):
 
     # ----------------------------------------------------------------------------------------------
     @typechecked
-    def __init__(self, save_directory: str | None = None) -> None:
+    def __init__(self, save_directory: str | pathlib.Path | None = None) -> None:
         """Initializes the storage with an optional save directory."""
         self._save_directory = pathlib.Path(save_directory) if save_directory else None
         self._time_list = []
@@ -54,9 +53,9 @@ class BaseStorage(ABC):
 
     # ----------------------------------------------------------------------------------------------
     def append(self, time: float | np.ndarray, result: np.ndarray) -> None:
-        """Appends a time and result data to the storage.
+        """Appends time and result data to the storage.
 
-        By utilizing an append mechanism, storage objects do not need to know the size of the 
+        By utilizing an append mechanism, storage objects do not need to know the size of the
         result arrays upfront.This makes them suitable for static as well as dynamic integrators.
 
         Args:
@@ -74,34 +73,46 @@ class BaseStorage(ABC):
     # ----------------------------------------------------------------------------------------------
     def reset(self) -> None:
         """Resets the stored data.
-        
+
         This method is important to re-utilize storage objects for successive runs. It should be
         called before integration to delete data from previous runs if existing.
         """
-        self._time_list.clear()
-        self._result_list.clear()
+        self._reset_storage_lists()
 
     # ----------------------------------------------------------------------------------------------
     @abstractmethod
-    def get(self) -> Collection:
-        """Retrieves the stored data and saves to file.
+    def save(self) -> None:
+        """Saves the internal data to disk, depending on the implemented storage format."""
+        pass
 
-        This abstract method defines the interface for retrieving the data from a storage object.
-        Precisely, it performance two-different steps. Firstly, it saves the data to a file in
-        some format, depending on if a save directory is provided. Secondly, it returns handles
-        to the stored time and result data that behave very similar to numpy arrays.
+    # ----------------------------------------------------------------------------------------------
+    @abstractmethod
+    def get(self) -> tuple[Iterable, None]:
+        """Retrieves the stored data in form of numpy-like handles.
 
         Returns:
-            Collection: The stored time and result data. These might be actual numpy arrays or file
+            Iterable: The stored time and result data. These might be actual numpy arrays or file
                         handles that implement a similar interface.
         """
         pass
 
     # ----------------------------------------------------------------------------------------------
     def _make_result_directory(self) -> None:
-        """Creates the provided result directory if it doesn't exist."""
-        pathlib_dir = pathlib.Path(self._save_directory)
-        pathlib_dir.parent.mkdir(parents=True, exist_ok=True)
+        """Creates the requested result directory if it doesn't exist."""
+        self._save_directory.parent.mkdir(parents=True, exist_ok=True)
+
+    # ----------------------------------------------------------------------------------------------
+    def _prepare_output_arrays(self) -> tuple[np.ndarray]:
+        """Stacks time and result data into numpy arrays for further processing."""
+        time_array = np.stack(self._time_list, axis=0)
+        result_array = np.stack(self._result_list, axis=2)
+        return time_array, result_array
+
+    # ----------------------------------------------------------------------------------------------
+    def _reset_storage_lists(self) -> tuple[np.ndarray]:
+        """Reset the lists that store the data during integration."""
+        self._time_list.clear()
+        self._result_list.clear()
 
 
 # ====================================== Numpy Result Storage ======================================
@@ -113,22 +124,30 @@ class NumpyStorage(BaseStorage):
     """
 
     # ----------------------------------------------------------------------------------------------
-    def get(self) -> tuple[np.ndarray]:
-        """Retrieves the stored data as a tuple of NumPy arrays.
+    def save(self) -> None:
+        """Saves data to a npz file, if a save direcrtory has been provided.
         
-        If a save directory is provided, it also creates the result directory and saves the data
-        as a NumPy .npz file.
+        Times are stored in an array named "times", results in an array named "results".
+        """
+        if self._time_list and self._result_list:
+            if self._save_directory:
+                self._make_result_directory()
+                time_array, result_array = self._prepare_output_arrays()
+                np.savez(f"{self._save_directory}.npz", times=time_array, results=result_array)
+
+    # ----------------------------------------------------------------------------------------------
+    def get(self) -> tuple[np.ndarray | None]:
+        """Retrieves the stored data as a tuple of NumPy arrays.
 
         Returns:
             time_array (np.ndarray): A NumPy array containing the stored time data.
             result_array (np.ndarray): A NumPy array containing the stored result data.
         """
-        time_array = np.stack(self._time_list, axis=0)
-        result_array = np.stack(self._result_list, axis=2)
-        if self._save_directory:
-            self._make_result_directory()
-            np.savez(f"{self._save_directory}.npz", times=time_array, results=result_array)
-        return time_array, result_array
+        if self._time_list and self._result_list:
+            time_array, result_array = self._prepare_output_arrays()
+            return time_array, result_array
+        else:
+            return None, None
 
 
 # ==================================== Zarr Chunkwise Storage ======================================
@@ -166,7 +185,7 @@ class ZarrChunkwiseStorage(BaseStorage):
     # ----------------------------------------------------------------------------------------------
     def append(self, time: float | np.ndarray, result: np.ndarray) -> None:
         """Appends a time and result data to the storage.
-        
+
         Additionally saves the data to a Zarr file when the number of stored results reaches the
         chunk size.
 
@@ -176,13 +195,13 @@ class ZarrChunkwiseStorage(BaseStorage):
         """
         super().append(time, result)
         if len(self._result_list) >= self._chunk_size:
-            self._save_to_file()
-            super().reset()
+            self.save()
+            self._reset_storage_lists()
 
     # ----------------------------------------------------------------------------------------------
-    def get(self) -> zarr.Array:
+    def get(self) -> tuple[zarr.Array, None]:
         """Retrieves the stored time and result data as Zarr arrays.
-        
+
         Saves all current data to Zarr storage and returns handles to the stored time and result.
         These handles behave very similar to numpy arrays. The only pitfall is that when accessing
         the entire array, one has to call zarr_array[:] instead of just zarr_array.
@@ -190,8 +209,6 @@ class ZarrChunkwiseStorage(BaseStorage):
         Returns:
             zarr.Array: The Zarr array containing the stored time and result data.
         """
-        if self._result_list:
-            self._save_to_file()
         return self._zarr_storage_times, self._zarr_storage_results
 
     # ----------------------------------------------------------------------------------------------
@@ -200,27 +217,32 @@ class ZarrChunkwiseStorage(BaseStorage):
         super().reset()
         self._zarr_storage_group = None
         self._zarr_storage_times = None
-        self._zarr_storage_result = None
+        self._zarr_storage_results = None
 
     # ----------------------------------------------------------------------------------------------
-    def _save_to_file(self) -> None:
+    def save(self) -> None:
         """Saves the stored time and result data to a Zarr group."""
-        time_array = np.stack(self._time_list, axis=0)
-        result_array = np.stack(self._result_list, axis=2)
+        if self._time_list and self._result_list:
+            time_array, result_array = self._prepare_output_arrays()
 
-        if self._zarr_storage_group is None:
-            self._make_result_directory()
-            self._zarr_storage_group = zarr.group(
-                store=f"{self._save_directory}.zarr", overwrite=True
-            )
-            self._zarr_storage_times = self._zarr_storage_group.create_dataset(
-                "times", shape=time_array.shape
-            )
-            self._zarr_storage_results = self._zarr_storage_group.create_dataset(
-                "results", shape=result_array.shape
-            )
-            self._zarr_storage_times[:] = time_array
-            self._zarr_storage_results[:] = result_array
-        else:
-            self._zarr_storage_times.append(time_array, axis=0)
-            self._zarr_storage_results.append(result_array, axis=2)
+            if self._zarr_storage_group is None:
+                self._make_result_directory()
+                self._create_zarr_storage(time_array.shape, result_array.shape)
+                self._zarr_storage_times[:] = time_array
+                self._zarr_storage_results[:] = result_array
+            else:
+                self._zarr_storage_times.append(time_array, axis=0)
+                self._zarr_storage_results.append(result_array, axis=2)
+
+    # ----------------------------------------------------------------------------------------------
+    def _create_zarr_storage(
+        self, time_array_shape, result_array_shape
+    ) -> tuple[zarr.Group, zarr.Array]:
+        """Initializes Zarr group when `save()` is called for the first time."""
+        self._zarr_storage_group = zarr.group(store=f"{self._save_directory}.zarr", overwrite=True)
+        self._zarr_storage_times = self._zarr_storage_group.create_dataset(
+            "times", shape=time_array_shape
+        )
+        self._zarr_storage_results = self._zarr_storage_group.create_dataset(
+            "results", shape=result_array_shape
+        )

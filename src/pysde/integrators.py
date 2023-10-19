@@ -5,25 +5,25 @@ They take in a solver scheme and storage object, and execute the actual integrat
 All integrator implementations have to inherit from the `BaseIntegrator` class.
 
 Classes:
-    `BaseIntegrator`: Abstract base class for all integrators.
-    `StaticIntegrator`: Implementation with a fixed step size.
+    BaseIntegrator: Abstract base class for all integrators.
+    StaticIntegrator: Implementation with a fixed step size.
 
 Functions:
-    `reshape_initial_state`: Ensures consistency of the initial state provided by user. An initial
-                             state has to be convertible into a 2D array, whereas the first
-                             dimension accounts for the physical dimension of the solution, and the
-                             second dimension for the number of trajectories to be simulated.
-    `decorate_run_method`: Decorator that adds functionality to the `run` method of all subclasses
-                           of `BaseIntegrator`. This allows derived classes to only implement the
-                           integrator-specific logic in their `run` method. Initial state setup,
-                           consistency checks and error handling are handled by the decorator.
+    reshape_initial_state: Ensures consistency of the initial state provided by user. An initial
+                           state has to be convertible into a 2D array, whereas the first
+                           dimension accounts for the physical dimension of the solution, and the
+                           second dimension for the number of trajectories to be simulated.
+    decorate_run_method: Decorator that adds functionality to the `run` method of all subclasses
+                         of `BaseIntegrator`. This allows derived classes to only implement the
+                         integrator-specific logic in their `run` method. Initial state setup,
+                         consistency checks and error handling are handled by the decorator.
 """
 
 # =================================== Imports and Configuration ====================================
 import functools
 import traceback
 from abc import ABC, abstractmethod
-from collections.abc import Callable, Collection
+from collections.abc import Callable, Iterable
 from typing import final
 
 import numpy as np
@@ -32,10 +32,11 @@ from typeguard import typechecked
 
 from pysde import schemes, storages
 
-RunFunction = Callable[..., tuple[Collection, Collection]]
+RunFunction = Callable[..., tuple[Iterable, Iterable]]
 
 
 # ============================================ Utilities ===========================================
+@typechecked
 def reshape_initial_state(initial_state: float | np.ndarray) -> np.ndarray:
     """Reshapes the initial state array if necessary.
 
@@ -55,7 +56,7 @@ def reshape_initial_state(initial_state: float | np.ndarray) -> np.ndarray:
     if not (isinstance(initial_state, np.ndarray) and initial_state.ndim == 2):
         initial_state = np.atleast_2d(initial_state).T
     if initial_state.ndim > 2:
-        raise TypeError("Initial state can be at most 2D, " f"but has shape {initial_state.shape}")
+        raise ValueError(f"Initial state can be at most 2D, but has shape {initial_state.shape}")
     return initial_state
 
 
@@ -99,6 +100,7 @@ def decorate_run_method(run_function: RunFunction) -> RunFunction:
             print(f"Exception has occured during integration with {self.__class__.__name__}.")
             print("Integrator will be terminated normally and available results returned.")
             print(traceback.format_exc())
+            self._storage.save()
             time_array, result_array = self._storage.get()
         finally:
             return time_array, result_array
@@ -159,7 +161,7 @@ class BaseIntegrator(ABC):
     @abstractmethod
     def run(
         self, initial_state: float | np.ndarray, *args, **kwargs
-    ) -> tuple[Collection, Collection]:
+    ) -> tuple[Iterable, Iterable]:
         """Runs the integration process with the specified initial state.
 
         This is an abstract method that defines an interface with the mose generic set of arguments.
@@ -170,7 +172,7 @@ class BaseIntegrator(ABC):
             **kwargs: Additional keyword arguments.
 
         Returns:
-            tuple[Collection, Collection]:
+            tuple[Iterable, Iterable]:
                 A tuple containing the time array and the result array. For a static integrator, the
                 time array will be one-dimensional and of size N, where N is the number of step
                 sizes. For a dynamic integrator, the time array will be of two-dimensional, where
@@ -228,7 +230,7 @@ class StaticIntegrator(BaseIntegrator):
     @typechecked
     def run(
         self, initial_state: float | np.ndarray, start_time: float, step_size: float, num_steps: int
-    ) -> tuple[Collection, Collection]:
+    ) -> tuple[Iterable, Iterable]:
         """Runs the simulation.
 
         With a constant step size, the integrator  performs a deterministic loop for the given
@@ -247,7 +249,7 @@ class StaticIntegrator(BaseIntegrator):
             num_steps (int): The number of steps to run the simulation for.
 
         Returns:
-            tuple[Collection, Collection]: A
+            tuple[Iterable, Iterable]: A
         """
         if step_size <= 0:
             raise ValueError(f"Step size ({step_size}) must be positive.")
@@ -266,5 +268,6 @@ class StaticIntegrator(BaseIntegrator):
             self._storage.append(next_time, next_state)
             current_state = next_state
 
+        self._storage.save()
         time_array, result_array = self._storage.get()
         return time_array, result_array
