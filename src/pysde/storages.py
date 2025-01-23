@@ -1,6 +1,6 @@
 """Storage Objects for SDE Integration Results.
 
-This module provides custom storage objects for SDE integration results. They handle time and 
+This module provides custom storage objects for SDE integration results. They handle time and
 result arrays. All storage objects provide a common interface that can be leveraged by integrator
 objects, abstracting away different storage mechanisms within the integration procedure.
 
@@ -10,6 +10,7 @@ Classes:
     ZarrChunkwiseStorage: Storage relying on zarr file formats, allowing automatic chunkwise
                           storage to disk for large simulations.
 """
+
 # =================================== Imports and Configuration ====================================
 import pathlib
 from abc import ABC, abstractmethod
@@ -18,7 +19,6 @@ from typing import final
 
 import numpy as np
 import zarr
-from typeguard import typechecked
 
 
 # ======================================= Storage Base Class =======================================
@@ -27,7 +27,7 @@ class BaseStorage(ABC):
 
     This base class enforces a uniform interface on all storage objects, regardless of the
     respective storage mechanism. As a consequence, all storage objects can be used by any
-    integrator, inclusing dynamic integrators where the shape of the result arrays is not known
+    integrator, including dynamic integrators where the shape of the result arrays is not known
     a-priori.
 
     Methods:
@@ -44,7 +44,6 @@ class BaseStorage(ABC):
     """
 
     # ----------------------------------------------------------------------------------------------
-    @typechecked
     def __init__(self, save_directory: str | pathlib.Path | None = None) -> None:
         """Initializes the storage with an optional save directory."""
         self._save_directory = pathlib.Path(save_directory) if save_directory else None
@@ -126,7 +125,7 @@ class NumpyStorage(BaseStorage):
     # ----------------------------------------------------------------------------------------------
     def save(self) -> None:
         """Saves data to a npz file, if a save direcrtory has been provided.
-        
+
         Times are stored in an array named "times", results in an array named "results".
         """
         if self._time_list and self._result_list:
@@ -168,7 +167,6 @@ class ZarrChunkwiseStorage(BaseStorage):
     """
 
     # ----------------------------------------------------------------------------------------------
-    @typechecked
     def __init__(self, save_directory: str | pathlib.Path, chunk_size: int) -> None:
         """Initializes the ZarrChunkwiseStorage object.
 

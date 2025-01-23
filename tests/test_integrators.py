@@ -1,7 +1,6 @@
 # =================================== Imports and Configuration ====================================
 import numpy as np
 import pytest
-from typeguard import TypeCheckError
 
 from pysde import integrators, schemes, stochastic_integrals, storages
 
@@ -75,12 +74,6 @@ class TestReshapeInitialState:
     @pytest.mark.parametrize("input_array", [np.zeros((1, 2, 3, 4))])
     def test_invalid_shape(self, input_array):
         with pytest.raises(ValueError):
-            _ = integrators.reshape_initial_state(input_array)
-
-    # ----------------------------------------------------------------------------------------------
-    @pytest.mark.parametrize("input_array", ["invalid", None])
-    def test_invalid_type(self, input_array):
-        with pytest.raises(TypeCheckError):
             _ = integrators.reshape_initial_state(input_array)
 
 

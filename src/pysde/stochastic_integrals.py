@@ -13,7 +13,6 @@ from abc import ABC, abstractmethod
 from typing import final
 
 import numpy as np
-from typeguard import typechecked
 
 
 # ================================ Stochastic Integral Base Class ==================================
@@ -32,9 +31,8 @@ class BaseStochasticIntegral(ABC):
         __init__(): Base class constructor.
         compute_single(): Interface for computing a single stochastic integral.
     """
-    
+
     # ----------------------------------------------------------------------------------------------
-    @typechecked
     def __init__(self, seed: int) -> None:
         """Initializes an instance of the BaseStochasticIntegral class.
 

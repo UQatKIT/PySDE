@@ -20,6 +20,7 @@ def test_arrays_scalar_time():
         result_array_list.append(rng.uniform(-1, 1, size=(variable_dim, num_trajectories)))
     return scalar_time_array_list, result_array_list
 
+
 # --------------------------------------------------------------------------------------------------
 @pytest.fixture(scope="module")
 def test_arrays_vector_time():
@@ -42,7 +43,7 @@ class TestNumpyStorage:
     def test_storage(self, tmp_path):
         test_storage = storages.NumpyStorage(tmp_path / "data")
         return test_storage
-    
+
     # ----------------------------------------------------------------------------------------------
     @pytest.fixture(params=("test_arrays_scalar_time", "test_arrays_vector_time"))
     def test_storage_filled(self, test_storage, request):
@@ -133,7 +134,7 @@ class TestZarrChunkwiseStorage:
         for time, result in zip(time_array_list, result_array_list):
             test_storage.append(time, result)
         assert True
-    
+
     # ----------------------------------------------------------------------------------------------
     def test_reset(self, test_storage):
         test_storage.save()

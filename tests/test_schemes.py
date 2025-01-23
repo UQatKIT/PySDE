@@ -123,6 +123,3 @@ class TestExplicitEulerMaruyamaScheme:
 
         next_state = scheme.compute_step(initial_condition, current_time_vector, time_step_vector)
         assert next_state.shape == initial_condition.shape
-
-
-    

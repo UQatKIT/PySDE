@@ -2,7 +2,7 @@
 
 This module implements different integration schemes that can be employed within an integrator.
 Each scheme takes in the information of an SDE model and stochastic integegral generator, and
-provides a method for computing a single step in the numerical integration. All schemes have to be 
+provides a method for computing a single step in the numerical integration. All schemes have to be
 derived from the `BaseScheme` class.
 
 Classes:
@@ -16,7 +16,6 @@ from collections.abc import Callable
 from typing import final
 
 import numpy as np
-from typeguard import typechecked
 
 from pysde import stochastic_integrals
 
@@ -40,8 +39,8 @@ class BaseScheme(ABC):
         compute_Step(): Abstract method defining the interface for single-step
                         numerical integration.
     """
+
     # ----------------------------------------------------------------------------------------------
-    @typechecked
     def __init__(
         self,
         variable_dim: int,
@@ -52,7 +51,7 @@ class BaseScheme(ABC):
     ) -> None:
         """Initializes the BaseScheme class.
 
-        Scheme classes take in the information of an SDE model and a 
+        Scheme classes take in the information of an SDE model and a
         stochastic integegral generator. If the scheme requires higher order stochastic integral,
         it shhould implement checks if the provided integrator offers the required functionality.
         Single integrals are guaranteed to be implemented by all classes derived from
@@ -73,7 +72,6 @@ class BaseScheme(ABC):
         self._drift = drift_function
         self._diffusion = diffusion_function
         self._stochastic_integral = stochastic_integral
-
 
     # ----------------------------------------------------------------------------------------------
     @abstractmethod
@@ -106,7 +104,6 @@ class BaseScheme(ABC):
             np.ndarray: The next state of the SDE.
         """
         pass
-
 
     # ----------------------------------------------------------------------------------------------
     def check_consistency(self, initial_state: np.ndarray, static_steps: bool) -> None:
@@ -171,7 +168,6 @@ class ExplicitEulerMaruyamaScheme(BaseScheme):
     """
 
     # ----------------------------------------------------------------------------------------------
-    @typechecked
     def compute_step(
         self,
         current_state: np.ndarray,
@@ -189,7 +185,7 @@ class ExplicitEulerMaruyamaScheme(BaseScheme):
 
         Returns:
             np.ndarray: The next state of the SDE.
-        
+
         Raises:
             AssertionError: If the shape of the next state does not match that of the current state.
         """
@@ -206,7 +202,7 @@ class ExplicitEulerMaruyamaScheme(BaseScheme):
             + np.einsum("ijk,jk->ik", current_diffusion, random_incr)
         )
 
-        assert (
-            next_state.shape == current_state.shape
-        ), f"Shape mismatch: {next_state.shape} != {current_state.shape}"
+        assert next_state.shape == current_state.shape, (
+            f"Shape mismatch: {next_state.shape} != {current_state.shape}"
+        )
         return next_state

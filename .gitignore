@@ -194,10 +194,5 @@ pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode
 
-#--- Additional Ignores ---
-.pdm-python
-*.zarr
-applications/*/
-examples/*/
-.VSCodeCounter/
-.vscode/
+# Notebooks
+development.ipynb

@@ -28,7 +28,6 @@ from typing import final
 
 import numpy as np
 import tqdm
-from typeguard import typechecked
 
 from pysde import schemes, storages
 
@@ -36,7 +35,6 @@ RunFunction = Callable[..., tuple[Iterable, Iterable]]
 
 
 # ============================================ Utilities ===========================================
-@typechecked
 def reshape_initial_state(initial_state: float | np.ndarray) -> np.ndarray:
     """Reshapes the initial state array if necessary.
 
@@ -74,17 +72,18 @@ def decorate_run_method(run_function: RunFunction) -> RunFunction:
     This decorator performs these operations on the `run` method of subclasses of `BaseIntegrator`.
     Therefore these subclasses must only implement the bare integration logic, while still exposing
     a complete interface to the user.
-    
+
     Args:
         run_function (RunFunction): The original `run` method of a subclass of `BaseIntegrator`.
-    
+
     Returns:
-        RunFunction: The decorated `run` method, which performs additional pre-processing and 
+        RunFunction: The decorated `run` method, which performs additional pre-processing and
                      exception handling.
 
     Raises:
         TypeError: If the decorated function is not called from a subclass of `BaseIntegrator`.
     """
+
     @functools.wraps(run_function)
     def wrapper(self, initial_state: float | np.ndarray, *args, **kwargs):
         if not isinstance(self, BaseIntegrator):
@@ -97,7 +96,7 @@ def decorate_run_method(run_function: RunFunction) -> RunFunction:
         try:
             time_array, result_array = run_function(self, initial_state, *args, **kwargs)
         except BaseException:
-            print(f"Exception has occured during integration with {self.__class__.__name__}.")
+            print(f"Exception has occurred during integration with {self.__class__.__name__}.")
             print("Integrator will be terminated normally and available results returned.")
             print(traceback.format_exc())
             self._storage.save()
@@ -122,13 +121,12 @@ class BaseIntegrator(ABC):
 
     Methods:
         __init__(): Base class constructor.
-        run(): Inteface for integration runs.
+        run(): Interface for integration runs.
     """
 
     _is_static = None
 
     # ----------------------------------------------------------------------------------------------
-    @typechecked
     def __init__(self, scheme: schemes.BaseScheme, result_storage: storages.BaseStorage) -> None:
         """Initializes a new instance of the class.
 
@@ -159,12 +157,10 @@ class BaseIntegrator(ABC):
 
     # ----------------------------------------------------------------------------------------------
     @abstractmethod
-    def run(
-        self, initial_state: float | np.ndarray, *args, **kwargs
-    ) -> tuple[Iterable, Iterable]:
+    def run(self, initial_state: float | np.ndarray, *args, **kwargs) -> tuple[Iterable, Iterable]:
         """Runs the integration process with the specified initial state.
 
-        This is an abstract method that defines an interface with the mose generic set of arguments.
+        This is an abstract method that defines an interface with the most generic set of arguments.
 
         Args:
             initial_state (float | np.ndarray): The initial state for the integration process.
@@ -200,7 +196,6 @@ class StaticIntegrator(BaseIntegrator):
     _is_static = True
 
     # ----------------------------------------------------------------------------------------------
-    @typechecked
     def __init__(
         self,
         scheme: schemes.BaseScheme,
@@ -215,7 +210,7 @@ class StaticIntegrator(BaseIntegrator):
             scheme (schemes.BaseScheme): The chosen integration scheme. Needs to be a subclass of
                                          `BaseScheme`.
             result_storage (storages.BaseStorage): The chosen storage object. Needs to be a subclass
-                                                   of `BaseStorage`. 
+                                                   of `BaseStorage`.
             show_progressbar (bool, optional): Whether to show a progress bar for the integration.
                                                Defaults to False.
 
@@ -227,7 +222,6 @@ class StaticIntegrator(BaseIntegrator):
 
     # ----------------------------------------------------------------------------------------------
     @decorate_run_method
-    @typechecked
     def run(
         self, initial_state: float | np.ndarray, start_time: float, step_size: float, num_steps: int
     ) -> tuple[Iterable, Iterable]:
@@ -237,7 +231,7 @@ class StaticIntegrator(BaseIntegrator):
         number of steps and with the given step size. No error checking is performed.
 
         The method is decorated with the `decorate_run_method` decorator to enforce standard setup
-        and error handling for the integration loop. Hav a look at the base class documentation for
+        and error handling for the integration loop. Have a look at the base class documentation for
         a more detailed description of the return type.
 
         This method uses run-time type checking.

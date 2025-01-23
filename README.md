@@ -1,3 +1,3 @@
-# sdeint
+# PySDE
 
-Light-weight numerical integrator for stochastic differential equations
+A Light-weight numerical integrator for stochastic differential equations
