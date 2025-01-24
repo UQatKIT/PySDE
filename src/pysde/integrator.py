@@ -39,9 +39,9 @@ class SDEIntegrator:
         try:
             for i in tqdm(range(num_steps), disable=disable_progress_bar):
                 self._storage.store(current_time, current_state, i)
-                next_state = self._scheme.step(current_state, current_time, step_size)
+                vectorized_step = self._scheme.step(current_state, current_time, step_size)
+                current_state = current_state + vectorized_step
                 current_time += step_size
-                current_state = next_state
         except BaseException:  # noqa: BLE001
             traceback.print_exc()
         finally:

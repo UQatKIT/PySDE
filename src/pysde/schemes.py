@@ -49,7 +49,7 @@ class ExplicitEulerMaruyamaScheme(BaseScheme):
     ) -> npt.NDArray[np.floating]:
         dimension, num_trajectories = current_state.shape
         vectorized_increment = self._random_increment.sample(step_size, dimension, num_trajectories)
-        next_state = self._jitted_step(
+        vectorized_step = self._jitted_step(
             current_state,
             current_time,
             step_size,
@@ -57,7 +57,7 @@ class ExplicitEulerMaruyamaScheme(BaseScheme):
             self._diffusion,
             vectorized_increment,
         )
-        return next_state
+        return vectorized_step
 
     # ----------------------------------------------------------------------------------------------
     @staticmethod
@@ -71,11 +71,11 @@ class ExplicitEulerMaruyamaScheme(BaseScheme):
         vectorized_increment: npt.NDArray[np.floating],
     ) -> npt.NDArray[np.floating]:
         num_trajectories = current_state.shape[1]
-        next_state = np.empty_like(current_state)
+        vectorized_step = np.empty_like(current_state)
 
         for i in range(num_trajectories):
             current_drift = drift_function(current_state[:, i], current_time)
             current_diffusion = diffusion_function(current_state[:, i], current_time)
             scalar_step = current_drift * step_size + current_diffusion @ vectorized_increment[:, i]
-            next_state[:, i] = scalar_step
-        return next_state
+            vectorized_step[:, i] = scalar_step
+        return vectorized_step
