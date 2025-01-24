@@ -1,5 +1,8 @@
-from beartype import BeartypeConf, BeartypeStrategy, beartype
-from beartype.claw import beartype_this_package
+import warnings
 
-nobeartype = beartype(conf=BeartypeConf(strategy=BeartypeStrategy.O0))
+from beartype.claw import beartype_this_package
+from numba import NumbaPerformanceWarning
+
 beartype_this_package()
+
+warnings.filterwarnings("ignore", category=NumbaPerformanceWarning)

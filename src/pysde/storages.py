@@ -1,6 +1,7 @@
 # ==================================================================================================
 import pathlib
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from numbers import Real
 from typing import Annotated
 
@@ -18,23 +19,15 @@ class BaseStorage(ABC):
     ) -> None:
         self._stride = stride
         self._save_directory = save_directory
-        self._process_specific_directory = None
         self._time_list = []
         self._data_list = []
-
-    # ----------------------------------------------------------------------------------------------
-    def setup_parallel(self, process_id: Annotated[int, Is[lambda x: x > 0]]):
-        self._process_specific_directory = self._save_directory.with_name(
-            f"{self._save_directory.name}_p{process_id}"
-        )
-        self._process_specific_directory.parent.mkdir(parents=True, exist_ok=True)
 
     # ----------------------------------------------------------------------------------------------
     def store(
         self,
         time: Real,
         data: npt.NDArray[np.floating],
-        iteration_number: Annotated[int, Is[lambda x: x > 0]],
+        iteration_number: Annotated[int, Is[lambda x: x >= 0]],
     ) -> None:
         if iteration_number % self._stride == 0:
             self._time_list.append(time)
@@ -45,6 +38,12 @@ class BaseStorage(ABC):
     def save(self) -> None:
         raise NotImplementedError
 
+    # ----------------------------------------------------------------------------------------------
+    @property
+    @abstractmethod
+    def values(self) -> Iterable:
+        raise NotImplementedError
+
 
 # ==================================================================================================
 class NumpyStorage(BaseStorage):
@@ -52,9 +51,14 @@ class NumpyStorage(BaseStorage):
     def save(self) -> None:
         time_array = np.stack(self._time_list, axis=-1)
         data_array = np.stack(self._data_list, axis=-1)
-        np.savez_compressed(self._process_specific_directory, time=time_array, data=data_array)
-        self._time_list.clear()
-        self._data_list.clear()
+        np.savez_compressed(self._save_directory, time=time_array, data=data_array)
+
+    # ----------------------------------------------------------------------------------------------
+    @property
+    def values(self) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+        time_array = np.stack(self._time_list, axis=-1)
+        data_array = np.stack(self._data_list, axis=-1)
+        return time_array, data_array
 
 
 # ==================================================================================================
@@ -77,7 +81,7 @@ class ZarrChunkwiseStorage(BaseStorage):
         self,
         time: Real,
         data: npt.NDArray[np.floating],
-        iteration_number: Annotated[int, Is[lambda x: x > 0]],
+        iteration_number: Annotated[int, Is[lambda x: x >= 0]],
     ) -> None:
         if len(self._time_list) >= self._chunk_size:
             self._save_to_disk()
@@ -90,6 +94,13 @@ class ZarrChunkwiseStorage(BaseStorage):
         self._save_to_disk()
         self._time_list.clear()
         self._data_list.clear()
+
+    # ----------------------------------------------------------------------------------------------
+    @property
+    def values(self) -> tuple[zarr.Array, zarr.Array]:
+        if (self._zarr_storage_times is None) or (self._zarr_storage_data is None):
+            raise ValueError("No data has been saved to disk yet.")
+        return self._zarr_storage_time, self._zarr_storage_data
 
     # ----------------------------------------------------------------------------------------------
     def _save_to_disk(self) -> None:
@@ -105,9 +116,7 @@ class ZarrChunkwiseStorage(BaseStorage):
     def _init_storage_and_fill(
         self, time_array: npt.NDArray[np.floating], data_array: npt.NDArray[np.floating]
     ) -> None:
-        self._zarr_storage_group = zarr.group(
-            store=self._process_specific_directory, overwrite=True
-        )
+        self._zarr_storage_group = zarr.group(store=self._save_directory, overwrite=True)
         self._zarr_storage_time = self._zarr_storage_group.create_array(
             name="time", shape=time_array.shape, dtype=time_array.dtype, chunks=time_array.shape
         )

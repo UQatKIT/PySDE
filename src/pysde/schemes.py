@@ -2,22 +2,19 @@
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from numbers import Real
-from typing import Annotated
 
+import numba
 import numpy as np
 import numpy.typing as npt
-from beartype.vale import Is
+from beartype import BeartypeConf, BeartypeStrategy, beartype
 
 from pysde import increments
+
+nobeartype = beartype(conf=BeartypeConf(strategy=BeartypeStrategy.O0))
 
 
 # ==================================================================================================
 class BaseScheme(ABC):
-    # ----------------------------------------------------------------------------------------------
-    @abstractmethod
-    def setup_parallel(self, process_id: Annotated[int, Is[lambda x: x > 0]]) -> None:
-        raise NotImplementedError
-
     # ----------------------------------------------------------------------------------------------
     @abstractmethod
     def step(
@@ -38,13 +35,10 @@ class ExplicitEulerMaruyamaScheme(BaseScheme):
         diffusion_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray],
         random_increment: increments.BaseRandomIncrement,
     ) -> None:
-        self._drift = drift_function
-        self._diffusion = diffusion_function
+        self._drift = numba.njit(drift_function)
+        self._diffusion = numba.njit(diffusion_function)
+        self._jitted_step = numba.njit(self._step)
         self._random_increment = random_increment
-
-    # ----------------------------------------------------------------------------------------------
-    def setup_parallel(self, process_id: Annotated[int, Is[lambda x: x > 0]]) -> None:
-        self._random_increment.setup_parallel(process_id)
 
     # ----------------------------------------------------------------------------------------------
     def step(
@@ -53,8 +47,35 @@ class ExplicitEulerMaruyamaScheme(BaseScheme):
         current_time: Real,
         step_size: Real,
     ) -> npt.NDArray[np.floating]:
-        random_increment = self._random_increment.sample(step_size)
-        current_drift = self._drift(current_state, current_time)
-        current_diffusion = self._diffusion(current_state, current_time)
-        next_state = current_drift * step_size + current_diffusion @ random_increment
+        dimension, num_trajectories = current_state.shape
+        vectorized_increment = self._random_increment.sample(step_size, dimension, num_trajectories)
+        next_state = self._jitted_step(
+            current_state,
+            current_time,
+            step_size,
+            self._drift,
+            self._diffusion,
+            vectorized_increment,
+        )
+        return next_state
+
+    # ----------------------------------------------------------------------------------------------
+    @staticmethod
+    @nobeartype
+    def _step(
+        current_state: npt.NDArray[np.floating],
+        current_time: Real,
+        step_size: Real,
+        drift_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray],
+        diffusion_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray],
+        vectorized_increment: npt.NDArray[np.floating],
+    ) -> npt.NDArray[np.floating]:
+        num_trajectories = current_state.shape[1]
+        next_state = np.empty_like(current_state)
+
+        for i in range(num_trajectories):
+            current_drift = drift_function(current_state[:, i], current_time)
+            current_diffusion = diffusion_function(current_state[:, i], current_time)
+            scalar_step = current_drift * step_size + current_diffusion @ vectorized_increment[:, i]
+            next_state[:, i] = scalar_step
         return next_state
