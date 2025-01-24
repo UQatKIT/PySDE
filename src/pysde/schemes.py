@@ -37,7 +37,7 @@ class ExplicitEulerMaruyamaScheme(BaseScheme):
     ) -> None:
         self._drift = numba.njit(drift_function)
         self._diffusion = numba.njit(diffusion_function)
-        self._jitted_step = numba.njit(self._step)
+        self._jitted_step = numba.njit(self._step, parallel=True)
         self._random_increment = random_increment
 
     # ----------------------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ class ExplicitEulerMaruyamaScheme(BaseScheme):
         num_trajectories = current_state.shape[1]
         vectorized_step = np.empty_like(current_state)
 
-        for i in range(num_trajectories):
+        for i in numba.prange(num_trajectories):
             current_drift = drift_function(current_state[:, i], current_time)
             current_diffusion = diffusion_function(current_state[:, i], current_time)
             scalar_step = current_drift * step_size + current_diffusion @ vectorized_increment[:, i]

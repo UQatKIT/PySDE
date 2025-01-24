@@ -15,7 +15,9 @@ from beartype.vale import Is
 class BaseStorage(ABC):
     # ----------------------------------------------------------------------------------------------
     def __init__(
-        self, stride: Annotated[int, Is[lambda x: x > 0]], save_directory: pathlib.Path
+        self,
+        stride: Annotated[int, Is[lambda x: x > 0]],
+        save_directory: pathlib.Path | None = None,
     ) -> None:
         self._stride = stride
         self._save_directory = save_directory
@@ -51,7 +53,8 @@ class NumpyStorage(BaseStorage):
     def save(self) -> None:
         time_array = np.stack(self._time_list, axis=-1)
         data_array = np.stack(self._data_list, axis=-1)
-        np.savez_compressed(self._save_directory, time=time_array, data=data_array)
+        if self._save_directory is not None:
+            np.savez_compressed(self._save_directory, time=time_array, data=data_array)
 
     # ----------------------------------------------------------------------------------------------
     @property
