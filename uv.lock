@@ -1165,6 +1165,12 @@ wheels = [
 ]
 
 [[package]]
+name = "mpi4py"
+version = "4.0.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/08/34/8499a92a387d24d0092c38089f8195f13c5c76f0f814126af3fe363e5636/mpi4py-4.0.1.tar.gz", hash = "sha256:f3174b245775d556f4fddb32519a2066ef0592edc810c5b5a59238f9a0a40c89", size = 466179 }
+
+[[package]]
 name = "nbclient"
 version = "0.10.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1586,6 +1592,9 @@ docs = [
     { name = "mkdocs-material", marker = "sys_platform == 'linux'" },
     { name = "mkdocstrings", extra = ["python"], marker = "sys_platform == 'linux'" },
 ]
+mpi = [
+    { name = "mpi4py", marker = "sys_platform == 'linux'" },
+]
 test = [
     { name = "pytest", marker = "sys_platform == 'linux'" },
     { name = "pytest-cov", marker = "sys_platform == 'linux'" },
@@ -1617,6 +1626,7 @@ docs = [
     { name = "mkdocs-material", specifier = ">=9.5.50" },
     { name = "mkdocstrings", extras = ["python"], specifier = ">=0.27.0" },
 ]
+mpi = [{ name = "mpi4py", specifier = ">=4.0.1" }]
 test = [
     { name = "pytest", specifier = ">=8.3.4" },
     { name = "pytest-cov", specifier = ">=6.0.0" },
