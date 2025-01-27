@@ -23,7 +23,7 @@ num_steps = 1000
 
 settings = runner.Settings(
     scheme_type=schemes.ExplicitEulerMaruyamaScheme,
-    increment_type=increments.BrownianIncrement,
+    increment_type=increments.WienerIncrement,
     increment_seed=0,
     storage_type=storages.NumpyStorage,
     storage_stride=100,
