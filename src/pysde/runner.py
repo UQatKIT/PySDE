@@ -5,10 +5,6 @@ parameterized by a single dataclass. This is particularly useful for parallel ru
 The [ParallelRunner][pysde.runner.ParallelRunner] automatacally takes care of all the necessary
 steps to integrate a large ensemble of trajectories in parallel.
 
-!!! info
-    The wrapper objects are relatively high level, and therefore less stable with respect to changes
-    in the interface of low-level components.
-
 Classes:
     Settings: Settings for the setup of a runner object.
     SerialRunner: Runner for serial execution (with thread-parallel for loops over trajectories).
@@ -19,7 +15,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from numbers import Real
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import numpy as np
 import numpy.typing as npt
@@ -75,9 +71,12 @@ class SerialRunner:
     # ----------------------------------------------------------------------------------------------
     def __init__(
         self,
-        settings: Settings,
         drift_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray],
         diffusion_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray],
+        scheme_type: type[schemes.BaseScheme],
+        increment_type: type[increments.BaseRandomIncrement],
+        storage_type: type[storages.BaseStorage],
+        **kwargs: dict[str, Any],
     ) -> None:
         """Assemble an [`SDEIntegrator`][pysde.integrator.SDEIntegrator] object.
 
@@ -88,12 +87,12 @@ class SerialRunner:
             diffusion_function (Callable[[npt.NDArray[np.floating], Real], npt.NDArray]):
                 Diffusion function of the SDE (c.f. [`schemes`][pysde.schemes])
         """
-        storage = settings.storage_type(
-            stride=settings.storage_stride,
-            save_directory=settings.storage_save_directory,
+        storage = storage_type(
+            stride=kwargs.get("storage_stride"),
+            save_directory=kwargs.get("storage_save_directory"),
         )
-        increment = settings.increment_type(settings.increment_seed)
-        scheme = settings.scheme_type(drift_function, diffusion_function, increment)
+        increment = increment_type(kwargs.get("increment_seed"))
+        scheme = scheme_type(drift_function, diffusion_function, increment)
         self._integrator = integrator.SDEIntegrator(scheme, storage)
 
     # ----------------------------------------------------------------------------------------------
