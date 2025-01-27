@@ -11,8 +11,10 @@ from pysde import increments, runner, schemes, storages
 def drift(x, _t):
     return -x
 
+
 def diffusion(_x, _t):
-    return 1*np.identity(1)
+    return 1 * np.identity(1)
+
 
 x0 = np.ones((1, 100000))
 t0 = 0.0

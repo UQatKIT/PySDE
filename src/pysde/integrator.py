@@ -14,9 +14,7 @@ from pysde import schemes, storages
 # ==================================================================================================
 class SDEIntegrator:
     # ----------------------------------------------------------------------------------------------
-    def __init__(
-        self, scheme: schemes.BaseScheme, storage: storages.BaseStorage
-    ) -> None:
+    def __init__(self, scheme: schemes.BaseScheme, storage: storages.BaseStorage) -> None:
         self._scheme = scheme
         self._storage = storage
 
@@ -27,7 +25,7 @@ class SDEIntegrator:
         initial_time: Real,
         step_size: Real,
         num_steps: Annotated[int, Is[lambda x: x > 0]],
-        progress_bar: bool = False
+        progress_bar: bool = False,
     ):
         if not (isinstance(initial_state, np.ndarray) and initial_state.ndim == 2):
             initial_state = np.atleast_2d(initial_state).T
@@ -42,8 +40,8 @@ class SDEIntegrator:
                 vectorized_step = self._scheme.step(current_state, current_time, step_size)
                 current_state = current_state + vectorized_step
                 current_time += step_size
-        except BaseException: # noqa: BLE001
+        except BaseException:  # noqa: BLE001
             traceback.print_exc()
         finally:
             self._storage.save()
-            return self._storage # noqa: B012
+            return self._storage  # noqa: B012
