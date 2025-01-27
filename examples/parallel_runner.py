@@ -1,4 +1,4 @@
-# Run mpiexec -n 2 --map-by slot:PE=4 python -m mpi4py parallel_runner.py
+# Run with: mpiexec -n <NUM_RPOCS> --map-by slot:PE=<NUM_THREADS_PER_PROC> python -m mpi4py parallel_runner.py
 
 from pathlib import Path
 
