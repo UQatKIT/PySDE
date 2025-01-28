@@ -1,4 +1,4 @@
-# Run with: mpiexec -n <NUM_RPOCS> --map-by slot:PE=<NUM_THREADS_PER_PROC> python -m mpi4py parallel_runner.py
+# Run with: mpirun -n <NUM_RPOCS> --map-by slot:PE=<NUM_THREADS_PER_PROC> python -m mpi4py parallel_runner.py
 
 from pathlib import Path
 
@@ -21,14 +21,15 @@ t0 = 0.0
 dt = 0.01
 num_steps = 1000
 
-settings = runner.Settings(
+
+sde_runner = runner.ParallelRunner(
+    drift_function=drift,
+    diffusion_function=diffusion,
     scheme_type=schemes.ExplicitEulerMaruyamaScheme,
     increment_type=increments.WienerIncrement,
-    increment_seed=0,
     storage_type=storages.NumpyStorage,
-    storage_stride=100,
-    storage_save_directory=Path("data"),
+    seed=0,
+    stride=100,
+    save_directory=Path("data"),
 )
-
-sde_runner = runner.ParallelRunner(settings, drift, diffusion)
 result = sde_runner.run(x0, t0, dt, num_steps, progress_bar=True)
