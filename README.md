@@ -6,6 +6,7 @@ specifically, we consider vector-valued diffusion processes $\mathbf{X}_t$ on $\
 $$
     d\mathbf{X}_t = \mathbf{b}(\mathbf{X}_t,t)dt + \sqrt{\mathbf{\Sigma}(\mathbf{X}_t,t)} d\mathbf{W}_t,\quad\mathbf{X}(t=0)=\mathbf{X}_0\ \ a.s,
 $$
+
  with vector-valued *drift* $\mathbf{b}: \Omega\to\mathbb{R}^{d_X}$, matrix-valued *diffusion* $\mathbf{\Sigma}: \Omega\to\mathbb{R}^{d_x\times d_W}$, and vector valued *Wiener process* $\mathbf{W}_t \in\mathbb{R}^{d_W}$.
 
  PySDE has a modular core, making it easy to combine different components of the integrator or extend them. At the same time, PySDE is just simple: Simple to use, simple to understand. The user can provide drift and diffusion in simple numpy arrays. At the same time, PySDE is tailored towards integration of large ensembles of trajectories. Loops over trajectories are jit-compiled and accelerated with [Numba](https://numba.pydata.org/). We further implement custom data structures that import out-of-memory storage of the results. No need to evaluate statistics online or compromise on data resolution.
