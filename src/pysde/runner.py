@@ -56,7 +56,7 @@ class IntegratorBuilder:
         scheme_type: type[schemes.BaseScheme],
         increment_type: type[increments.BaseRandomIncrement],
         storage_type: type[storages.BaseStorage],
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401
     ) -> integrator.SDEIntegrator:
         """Assemble an [`SDEIntegrator`][pysde.integrator.SDEIntegrator] object.
 
@@ -84,7 +84,7 @@ class IntegratorBuilder:
     def _init_from_kwargs[cotype](
         cls,
         component_type: cotype,
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401
     ) -> cotype:
         """Initialize a component from matching parameters in `**kwargs dict`."""
         init_signature = inspect.signature(component_type.__init__)
@@ -145,7 +145,7 @@ class ParallelRunner:
         scheme_type: type[schemes.BaseScheme],
         increment_type: type[increments.BaseRandomIncrement],
         storage_type: type[storages.BaseStorage],
-        **kwargs: Any,
+        **kwargs: Any,  # noqa: ANN401
     ) -> None:
         """Initialize the parallel runner.
 
@@ -202,7 +202,7 @@ class ParallelRunner:
         return result_storage
 
     # ----------------------------------------------------------------------------------------------
-    def _adjust_process_dependent_parameters(self, **kwargs: Any) -> dict[str, Any]:
+    def _adjust_process_dependent_parameters(self, **kwargs: Any) -> dict[str, Any]:  # noqa: ANN401
         """Adjust parameters of the integrator run depending on the MPI rank."""
         adjusted_kwargs = kwargs.copy()
         try:
