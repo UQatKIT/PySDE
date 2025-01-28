@@ -1,3 +1,7 @@
+![Docs](https://img.shields.io/github/actions/workflow/status/UQatKIT/MTMLDA/docs.yaml?label=Docs)
+![Python Version](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2FUQatKIT%2FMTMLDA%2Fmain%2Fpyproject.toml)
+![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)
+
 # PySDE: A Light-Weight Numerical Integrator for Stochastic Differential Equations
 
 PySDE is a light-weight numerical integrator for stochastic differential equations (SDE). More 
