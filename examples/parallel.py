@@ -8,11 +8,11 @@ from pysde import increments, runner, schemes, storages
 
 
 # ==================================================================================================
-def drift(x, _t):
+def drift(x, t):
     return -x
 
 
-def diffusion(_x, _t):
+def diffusion(x, t):
     return 1 * np.identity(1)
 
 
@@ -30,6 +30,6 @@ sde_runner = runner.ParallelRunner(
     storage_type=storages.NumpyStorage,
     seed=0,
     stride=100,
-    save_directory=Path("data"),
+    save_directory=Path("../example_results/data"),
 )
 result = sde_runner.run(x0, t0, dt, num_steps, progress_bar=True)
