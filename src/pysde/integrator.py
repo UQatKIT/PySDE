@@ -49,7 +49,7 @@ class SDEIntegrator:
         step_size: Real,
         num_steps: Annotated[int, Is[lambda x: x > 0]],
         progress_bar: bool = False,
-    ):
+    ) -> storages.BaseStorage:
         r"""Run the integration process.
 
         Args:

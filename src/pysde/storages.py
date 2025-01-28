@@ -5,7 +5,7 @@ does nit fit into RAM. A possible solution is to only store statistics or implem
 PySDE, we provide a simpple option for actually storing all the data, and process it a-posteriori.
 This is realized by data containers that automatically flush data from memory to disk. The data
 storage backend we employ is Zarr, but any other backend can easily implemented by deriving from
-the [`BaseStorage`][pysde.storage.BaseStorage] class.
+the [`BaseStorage`][pysde.storages.BaseStorage] class.
 
 classes:
     BaseStorage: ABC for data storage objects.
@@ -35,7 +35,7 @@ class BaseStorage(ABC):
     ABC level, but only included in backend-specific implementations. The internal structure of
     storage objects is very simplistic. It consitst of a list of scalars (for time) and a list of
     numpy arrays (for trajectory data). These list is appended to when the
-    [`store`][pysde.storage.BaseStorage.store] method is called. Further processing of the data is
+    [`store`][pysde.storages.BaseStorage.store] method is called. Further processing of the data is
     backend-specific.
 
     Methods:
@@ -107,7 +107,7 @@ class NumpyStorage(BaseStorage):
     """Storage object with simple Numpy backend.
 
     Data in this storage object is not automatically flushed to disk, but can be stored manually
-    in `npz` format using the [`save`][pysde.storage.NumpyStorage.save] method.
+    in `npz` format using the [`save`][pysde.storages.NumpyStorage.save] method.
 
     Methods:
         save: Stack internal lists to numpy arrays and save to disk in compressed `npz` format.
