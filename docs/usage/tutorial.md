@@ -1,12 +1,12 @@
-# Modular
+# Input Data
 
 ```python
 import numpy as np
 
-def drift(x, _t):
+def drift(x, t):
     return -x
 
-def diffusion(_x, _t):
+def diffusion(x, t):
     return 1 * np.identity(1)
 ```
 
@@ -16,6 +16,9 @@ t0 = 0.0
 dt = 0.01
 num_steps = 1000
 ```
+
+<br>
+# Modular
 
 ```python
 storage = storages.NumpyStorage(stride=100)
@@ -30,24 +33,42 @@ result = sde_integrator.run(
 )
 ```
 
-# Serial Runner
-
-```python
-
-```
+<br>
+# Builder
 
 ```python
 from pysde import runner
 
-settings = runner.Settings(
+sde_integrator = runner.IntegratorBuilder.build_integrator(
+    drift_function=drift,
+    diffusion_function=diffusion,
     scheme_type=schemes.ExplicitEulerMaruyamaScheme,
     increment_type=increments.WienerIncrement,
-    increment_seed=0,
     storage_type=storages.NumpyStorage,
-    storage_stride=100,
-    storage_save_directory=Path("data"),
+    seed=0,
+    stride=100,
+    save_directory=Path("data"),
 )
+result = sde_integrator.run(x0, t0, dt, num_steps, progress_bar=True)
 ```
 
-
+<br>
 # Parallel Runner
+
+```python
+sde_runner = runner.ParallelRunner(
+    drift_function=drift,
+    diffusion_function=diffusion,
+    scheme_type=schemes.ExplicitEulerMaruyamaScheme,
+    increment_type=increments.WienerIncrement,
+    storage_type=storages.NumpyStorage,
+    seed=0,
+    stride=100,
+    save_directory=Path("data"),
+)
+result = sde_runner.run(x0, t0, dt, num_steps, progress_bar=True)
+```
+
+```bash
+mpirun -n <NUM_RPOCS> --map-by slot:PE=<NUM_THREADS_PER_PROC> python -m mpi4py parallel_runner.py
+```

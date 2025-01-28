@@ -18,7 +18,7 @@ $$
 
  PySDE can be installed via pip,
  ```bash
-pip install PySDE
+pip install pysde
  ```
 
 For development, we recommend using the great [uv](https://docs.astral.sh/uv/) project management tool, for which we provide a universal lock file. To set up a reproducible environment, run
