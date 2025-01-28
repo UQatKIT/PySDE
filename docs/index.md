@@ -13,7 +13,7 @@ PySDE has a modular core, making it easy to combine different components of the 
 
 !!! note "PySDE and Diffrax"
 
-    The excellent [Diffrax](https://github.com/patrick-kidger/diffrax) library is a more powerful general-purpose library for solving SDEs. PySDE has the goal to be complementary to Diffrax, serving a niche: It is very simplke to use, understand, and extend (without knowledge of JAX). Moreover, it is specifically tailored towards large trajectory ensembles on HPC architectures. At some point, PySDE might be come a wrapper to Diffrax, but even that wrapper code would probably be more complex than the current internals of PySDE.
+    The excellent [Diffrax](https://github.com/patrick-kidger/diffrax) library is a more powerful general-purpose library for solving SDEs. PySDE has the goal to be complementary to Diffrax, serving a niche: It is very simple to use, understand, and extend (without knowledge of JAX). Moreover, it is specifically tailored towards large trajectory ensembles on HPC architectures. At some point, PySDE might be come a wrapper to Diffrax, but even that wrapper code would probably be more complex than the current internals of PySDE.
 
 
 ## Installation
