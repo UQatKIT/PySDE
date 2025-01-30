@@ -4,7 +4,7 @@ PySDE is a light-weight numerical integrator for stochastic differential equatio
 specifically, we consider vector-valued diffusion processes $\mathbf{X}_t$ on $\Omega\in\mathbb{R}^{d_X}$, continuously indexed over time $t\in\mathbb{R}$. PySDE solves corresponding SDEs of the form
 
 $$
-    d\mathbf{X}_t = \mathbf{b}(\mathbf{X}_t,t)dt + \sqrt{\mathbf{\Sigma}(\mathbf{X}_t,t)} d\mathbf{W}_t,\quad\mathbf{X}(t=0)=\mathbf{X}_0\ \ a.s,
+    d\mathbf{X}_t = \mathbf{b}(\mathbf{X}_t,t)dt + \mathbf{\Sigma}(\mathbf{X}_t,t) d\mathbf{W}_t,\quad\mathbf{X}(t=0)=\mathbf{X}_0\ \ a.s,
 $$
 
 with vector-valued *drift* $\mathbf{b}: \Omega\to\mathbb{R}^{d_X}$, matrix-valued *diffusion* $\mathbf{\Sigma}: \Omega\to\mathbb{R}^{d_x\times d_W}$, and vector valued *Wiener process* $\mathbf{W}_t \in\mathbb{R}^{d_W}$.
@@ -22,6 +22,11 @@ PySDE can be installed via pip,
 ```bash
 pip install pysde
 ```
+
+To install with MPI support, install with the corresponding extra (MPI needs to be available in the system path),
+```bash
+pip install pysde[mpi]
+ ```
 
 For development, we recommend using the great [uv](https://docs.astral.sh/uv/) project management tool, for which we provide a universal lock file. To set up a reproducible environment, run
 ```bash
