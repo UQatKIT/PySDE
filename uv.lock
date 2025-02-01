@@ -1166,9 +1166,9 @@ wheels = [
 
 [[package]]
 name = "mpi4py"
-version = "4.0.1"
+version = "4.0.2"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/08/34/8499a92a387d24d0092c38089f8195f13c5c76f0f814126af3fe363e5636/mpi4py-4.0.1.tar.gz", hash = "sha256:f3174b245775d556f4fddb32519a2066ef0592edc810c5b5a59238f9a0a40c89", size = 466179 }
+sdist = { url = "https://files.pythonhosted.org/packages/8a/14/59ad7f82efc083ec5368fe6b30be57c60c23ee1b2608da26d9076f780072/mpi4py-4.0.2.tar.gz", hash = "sha256:86085436d3ea3587323321b9e661e4df60eabbcf11c2c9cf63d0873ca111cc8b", size = 466253 }
 
 [[package]]
 name = "nbclient"
@@ -1577,6 +1577,11 @@ dependencies = [
     { name = "zarr", marker = "sys_platform == 'linux'" },
 ]
 
+[package.optional-dependencies]
+mpi = [
+    { name = "mpi4py", marker = "sys_platform == 'linux'" },
+]
+
 [package.dev-dependencies]
 dev = [
     { name = "jupyter", marker = "sys_platform == 'linux'" },
@@ -1592,9 +1597,6 @@ docs = [
     { name = "mkdocs-material", marker = "sys_platform == 'linux'" },
     { name = "mkdocstrings", extra = ["python"], marker = "sys_platform == 'linux'" },
 ]
-mpi = [
-    { name = "mpi4py", marker = "sys_platform == 'linux'" },
-]
 test = [
     { name = "pytest", marker = "sys_platform == 'linux'" },
     { name = "pytest-cov", marker = "sys_platform == 'linux'" },
@@ -1604,6 +1606,7 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "beartype", specifier = ">=0.19.0" },
+    { name = "mpi4py", marker = "extra == 'mpi'", specifier = ">=4.0.2" },
     { name = "numba", specifier = ">=0.61.0" },
     { name = "numpy", specifier = ">=2.1.3" },
     { name = "scipy", specifier = ">=1.15.1" },
@@ -1626,7 +1629,7 @@ docs = [
     { name = "mkdocs-material", specifier = ">=9.5.50" },
     { name = "mkdocstrings", extras = ["python"], specifier = ">=0.27.0" },
 ]
-mpi = [{ name = "mpi4py", specifier = ">=4.0.1" }]
+mpi = []
 test = [
     { name = "pytest", specifier = ">=8.3.4" },
     { name = "pytest-cov", specifier = ">=6.0.0" },

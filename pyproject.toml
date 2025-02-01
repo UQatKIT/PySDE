@@ -27,6 +27,11 @@ dependencies = [
     "zarr>=3.0.1",
 ]
 
+[project.optional-dependencies]
+mpi = [
+    "mpi4py>=4.0.2",
+]
+
 [dependency-groups]
 dev = [
     "jupyter>=1.1.1",
@@ -46,9 +51,6 @@ test = [
     "pytest>=8.3.4",
     "pytest-cov>=6.0.0",
     "pytest-xdist>=3.6.1",
-]
-mpi = [
-    "mpi4py>=4.0.1",
 ]
 
 
