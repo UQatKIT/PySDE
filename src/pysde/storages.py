@@ -33,8 +33,8 @@ class BaseStorage(ABC):
     This class provides the minimal interface for storage objects. This includes a stride for sample
     saves and a path to save data on disk to. Automatic flushing to disk is not enforced on the
     ABC level, but only included in backend-specific implementations. The internal structure of
-    storage objects is very simplistic. It consitst of a list of scalars (for time) and a list of
-    numpy arrays (for trajectory data). These list is appended to when the
+    storage objects is very simplistic. It consists of a list of scalars (for time) and a list of
+    numpy arrays (for trajectory data). These lists is appended to when the
     [`store`][pysde.storages.BaseStorage.store] method is called. Further processing of the data is
     backend-specific.
 
@@ -131,9 +131,8 @@ class NumpyStorage(BaseStorage):
     def values(self) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]:
         """Stack internal lists to numpy arrays and return time and trajectory arrays.
 
-        Returns:
-            tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]: For $M$ saved snapshots,
-                return time array of shape $(M,)$ and data array of shape $(d_X, N, M)$.
+        For $M$ saved snapshots, return time array of shape $(M,)$ and data array of shape
+        $(d_X, N, M)$.
         """
         time_array = np.stack(self._time_list, axis=-1)
         data_array = np.stack(self._data_list, axis=-1)
@@ -147,7 +146,8 @@ class ZarrStorage(BaseStorage):
     Zarr is a powerful storage backend inspired by the HDF5 format. It provides a numpy-like API
     while storing data on disk in a compressed and chunked format. This storage object saves data
     automatically to disk in regular intervals, making it suitable for SDE runs with large ensembles
-    and/or long integration times. The data is stored in a Zarr group
+    and/or long integration times. The data is stored in a
+    [Zarr group](https://zarr.readthedocs.io/en/stable/user-guide/groups.html).
     """  # noqa: E501
 
     # ----------------------------------------------------------------------------------------------
@@ -177,7 +177,7 @@ class ZarrStorage(BaseStorage):
         data: npt.NDArray[np.floating],
         iteration_number: Annotated[int, Is[lambda x: x >= 0]],
     ) -> None:
-        r"""Store current time and trajectory ensenmble in memory, if stride is reached.
+        r"""Store current time and trajectory ensemble in memory, if stride is reached.
 
         If the local buffer is full, as defined by `chunk_size`, the data is flushed to disk.
 
@@ -208,13 +208,12 @@ class ZarrStorage(BaseStorage):
     def values(self) -> tuple[zarr.Array, zarr.Array]:
         """Return Zarr handles to time and trajectory data.
 
-        Raises:
-            ValueError: _description_
+        Numpy-like handles to time and trajectory data. For $M$ saved snapshots, return time array
+        of shape $(M,)$ and data array of shape $(d_X, N, M)$.
 
-        Returns:
-            tuple[zarr.Array, zarr.Array]: Numpy-like handles to time and trajectory data. For $M$
-            saved snapshots, return time array of shape $(M,)$ and data array of shape
-            $(d_X, N, M)$.
+        Raises:
+            ValueError: Checks that internal storage has been initialized. This is done
+            automatically when the first chunk of data is flushed to disk.
         """
         if (self._zarr_storage_times is None) or (self._zarr_storage_data is None):
             raise ValueError("No data has been saved to disk yet.")
@@ -235,7 +234,7 @@ class ZarrStorage(BaseStorage):
     def _init_storage_and_fill(
         self, time_array: npt.NDArray[np.floating], data_array: npt.NDArray[np.floating]
     ) -> None:
-        """Init Zarr stprage and fill with initial time and trajectory data."""
+        """Init Zarr storage and fill with initial time and trajectory data."""
         self._zarr_storage_group = zarr.group(store=self._save_directory, overwrite=True)
         self._zarr_storage_time = self._zarr_storage_group.create_array(
             name="time", shape=time_array.shape, dtype=time_array.dtype, chunks=time_array.shape
