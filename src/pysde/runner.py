@@ -27,7 +27,6 @@ from typing import Annotated, Any
 import numpy as np
 import numpy.typing as npt
 from beartype.vale import Is
-from mpi4py import MPI
 
 from pysde import increments, integrator, schemes, storages
 
