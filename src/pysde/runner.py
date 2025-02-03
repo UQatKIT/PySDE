@@ -5,7 +5,7 @@ useful for parallel runs based on MPI.
 The [ParallelRunner][pysde.runner.ParallelRunner] automatically takes care of all the necessary
 steps to integrate a large ensemble of trajectories in parallel.
 
-!!! note: kwargs for the Runners
+!!! note "kwargs for the Runners"
 
     The [`IntegratorBuilder`][pysde.runner.IntegratorBuilder] provides a very flexible mechanism to
     provide all necessary arguments for the SDE integrator via `**kwargs`. These arguments are
@@ -34,6 +34,7 @@ try:
     from mpi4py import MPI
 
     MPI_LOADED = True
+    """Check if mpi4py can be loaded for parallel execution."""
 except ImportError:
     MPI_LOADED = False
 
@@ -85,7 +86,7 @@ class IntegratorBuilder:
         component_type: cotype,
         **kwargs: Any,  # noqa: ANN401
     ) -> cotype:
-        """Initialize a component from matching parameters in `**kwargs dict`."""
+        """Initialize a component from matching parameters in `**kwargs` dict."""
         init_signature = inspect.signature(component_type.__init__)
         init_args = list(init_signature.parameters.keys())
         init_args.remove("self")
@@ -104,7 +105,7 @@ class ParallelRunner:
     """Runner for parallel integration with MPI.
 
     The `ParallelRunner` object initiates process-parallel integration based on MPI. It is only
-    avaailable if PySDE has been installed with the `mpi` option, and an MPI executable is available
+    available if PySDE has been installed with the `mpi` option, and an MPI executable is available
     on the system path. The runner utilizes two-level hybrid parallelism. On the process level, it
     partitions the ensemble of trajectories across the available processes. On the thread level, it
     executes thread-parallel for loops over the locally assigned trajectories. This makes scaling
@@ -114,23 +115,24 @@ class ParallelRunner:
     invoking MPI rank. It then constructs an SDE integrator with the
     [IntegratorBuilder][pysde.runner.IntegratorBuilder] component from the adjusted parameters.
     The adjustments are the following:
+
     1. Partition ensemble of initial states equally across processes.
     2. Adjust the random seed for the random increment object (add the rank number).
     3. Adjust the save directory for the storage object (add the rank number).
 
-    !!! note: Execution from the command line
+    !!! note "Execution from the command line"
 
         Thread-parallel numba loops do not intelligently recognize the number of available threads
         in an MPI environment. Available threads have therefore by mapped to the MPI processes
         explicitly in the invoking `mpirun` command:
         ```bash
-            mpirun -n <NUM_RPOCS> --map-by slot:PE=<NUM_THREADS_PER_PROC> python -m mpi4py parallel_runner.py
+        mpirun -n <NUM_RPOCS> --map-by slot:PE=<NUM_THREADS_PER_PROC> python -m mpi4py parallel_runner.py
         ```
 
-    !!! warning: Superfluous threads
+    !!! warning "Superfluous threads"
 
         The MPI schedular might assign to extra threads to the MPI process of rank 0. The
-        NUM_THREADS_PER_PROC parameter should be adjusted accordingly.
+        `NUM_THREADS_PER_PROC` parameter should be adjusted accordingly.
 
     Methods:
         run: Run the SDE integration process, return storage object on given MPI rank.
@@ -186,7 +188,7 @@ class ParallelRunner:
             initial_state (Real | npt.NDArray): Initial state of the system, given for all
                 trajectories with shape $d_X \times N$
             initial_time (Real): Initial time $t_0$ of the stochastic process
-            step_size (Real): Discrete step size $\delta t$
+            step_size (Real): Discrete step size $\Delta t$
             num_steps (int): Number of steps to integrate
             progress_bar (bool): Whether to display a progress bar
 
