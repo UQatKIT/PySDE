@@ -11,7 +11,7 @@ combinations of Lévy areas. The ABC simply enforces an interface for the
 
 classes:
     BaseRandomIncrement: ABC of stochastic integrals for diffusion tems in SDEs.
-    WienerIncrement: Simple implementation of a Wiener process increment for first order schemes.
+    BrownianIncrement: Simple implementation of a Wiener process increment for first order schemes.
 """
 
 # ==================================================================================================
@@ -54,7 +54,7 @@ class BaseRandomIncrement(ABC):
     ) -> object:
         r"""Generate a random increment.
 
-        Stochastic integrals take at least a step size $\nabla t$, a physical dimension $d_W$, and
+        Stochastic integrals take at least a step size $\Delta t$, a physical dimension $d_W$, and
         the number of trajectories $N$. Generation of the random increment has to be vectorized over
         $N$.
 
@@ -74,12 +74,12 @@ class BaseRandomIncrement(ABC):
 
 
 # ==================================================================================================
-class WienerIncrement(BaseRandomIncrement):
+class BrownianIncrement(BaseRandomIncrement):
     r"""Simple implementation of a Wiener process increment for first order schemes.
 
-    For a step size $dt$, we approximate $dW_t$ simply as $\sqrt{t}\xi$, where $\xi$ is a vector
+    For a step size $\Delta t$, we approximate $dW_t$ simply as $\sqrt{\Delta t}\xi$, where $\xi$ is a vector
     of i.i.d. unit normal samples.
-    The sample is implemented to also work with $\delta t < 0$ for integration
+    The sample is implemented to also work with $\Delta t < 0$ for integration
     backwards in time.
     """
 

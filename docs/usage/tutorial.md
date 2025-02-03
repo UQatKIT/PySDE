@@ -22,7 +22,7 @@ num_steps = 1000
 
 ```python
 storage = storages.NumpyStorage(stride=100)
-brownian_increment = increments.WienerIncrement(seed=0)
+brownian_increment = increments.BrownianIncrement(seed=0)
 scheme = schemes.ExplicitEulerMaruyamaScheme(drift, diffusion, brownian_increment)
 sde_integrator = integrator.SDEIntegrator(scheme, storage)
 ```
@@ -43,7 +43,7 @@ sde_integrator = runner.IntegratorBuilder.build_integrator(
     drift_function=drift,
     diffusion_function=diffusion,
     scheme_type=schemes.ExplicitEulerMaruyamaScheme,
-    increment_type=increments.WienerIncrement,
+    increment_type=increments.BrownianIncrement,
     storage_type=storages.NumpyStorage,
     seed=0,
     stride=100,
@@ -60,7 +60,7 @@ sde_runner = runner.ParallelRunner(
     drift_function=drift,
     diffusion_function=diffusion,
     scheme_type=schemes.ExplicitEulerMaruyamaScheme,
-    increment_type=increments.WienerIncrement,
+    increment_type=increments.BrownianIncrement,
     storage_type=storages.NumpyStorage,
     seed=0,
     stride=100,

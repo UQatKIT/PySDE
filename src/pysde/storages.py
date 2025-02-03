@@ -213,7 +213,7 @@ class ZarrStorage(BaseStorage):
 
         Raises:
             ValueError: Checks that internal storage has been initialized. This is done
-            automatically when the first chunk of data is flushed to disk.
+                automatically when the first chunk of data is flushed to disk.
         """
         if (self._zarr_storage_times is None) or (self._zarr_storage_data is None):
             raise ValueError("No data has been saved to disk yet.")
