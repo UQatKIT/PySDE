@@ -106,12 +106,12 @@ class TestNumpyStorage:
 
 
 # =============================== Tests for Zarr Chunkwise Storage =================================
-class TestZarrChunkwiseStorage:
+class TestZarrStorage:
     # ----------------------------------------------------------------------------------------------
     @pytest.fixture(params=[1, 3, 10])
     def test_storage(self, tmp_path, request):
         chunk_size = request.param
-        test_storage = storages.ZarrChunkwiseStorage(tmp_path / "data", chunk_size)
+        test_storage = storages.ZarrStorage(tmp_path / "data", chunk_size)
         return test_storage
 
     # ----------------------------------------------------------------------------------------------
@@ -124,7 +124,7 @@ class TestZarrChunkwiseStorage:
 
     # ----------------------------------------------------------------------------------------------
     def test_init_storage(self, tmp_path):
-        _ = storages.ZarrChunkwiseStorage(tmp_path, 1)
+        _ = storages.ZarrStorage(tmp_path, 1)
         assert True
 
     # ----------------------------------------------------------------------------------------------

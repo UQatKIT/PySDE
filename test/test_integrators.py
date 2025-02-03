@@ -6,7 +6,7 @@ from pysde import integrators, schemes, stochastic_integrals, storages
 
 
 # ===================================== Module-Level Fixtures ======================================
-@pytest.fixture(params=[(storages.NumpyStorage, None), (storages.ZarrChunkwiseStorage, 100)])
+@pytest.fixture(params=[(storages.NumpyStorage, None), (storages.ZarrStorage, 100)])
 def storage(request, tmp_path):
     storage_type, chunk_size = request.param
     if chunk_size:

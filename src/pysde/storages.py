@@ -1,16 +1,16 @@
 """Storage objects for large data processing.
 
 For SDE simulations with large numbers of trajectories and time steps, the resulting data often
-does nit fit into RAM. A possible solution is to only store statistics or implement strides. In
-PySDE, we provide a simpple option for actually storing all the data, and process it a-posteriori.
+does not fit into RAM. A possible solution is to only store statistics or implement strides. In
+PySDE, we provide a simple option for actually storing all the data, and process it a-posteriori.
 This is realized by data containers that automatically flush data from memory to disk. The data
-storage backend we employ is Zarr, but any other backend can easily implemented by deriving from
+storage backend we employ is [Zarr](https://zarr.readthedocs.io/en/stable/), but any other backend can easily be implemented by deriving from
 the [`BaseStorage`][pysde.storages.BaseStorage] class.
 
 classes:
     BaseStorage: ABC for data storage objects.
     NumpyStorage: Storage object with simple Numpy backend.
-    ZarrChunkwiseStorage: Storage object with Zarr backend and chunkwise saving.
+    ZarrStorage: Storage object with Zarr backend and chunkwise saving.
 """
 
 # ==================================================================================================
@@ -141,7 +141,7 @@ class NumpyStorage(BaseStorage):
 
 
 # ==================================================================================================
-class ZarrChunkwiseStorage(BaseStorage):
+class ZarrStorage(BaseStorage):
     """Storage object with [Zarr](https://zarr.readthedocs.io/en/stable/) backend and chunkwise saving.
 
     Zarr is a powerful storage backend inspired by the HDF5 format. It provides a numpy-like API
