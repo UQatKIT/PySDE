@@ -77,8 +77,8 @@ class BaseRandomIncrement(ABC):
 class BrownianIncrement(BaseRandomIncrement):
     r"""Simple implementation of a Wiener process increment for first order schemes.
 
-    For a step size $\Delta t$, we approximate $dW_t$ simply as $\sqrt{\Delta t}\xi$, where $\xi$ is a vector
-    of i.i.d. unit normal samples.
+    For a step size $\Delta t$, we approximate $dW_t$ simply as $\sqrt{\Delta t}\xi$, where $\xi$ is
+    a vector of i.i.d. unit normal samples.
     The sample is implemented to also work with $\Delta t < 0$ for integration
     backwards in time.
     """

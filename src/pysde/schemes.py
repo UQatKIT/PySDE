@@ -1,13 +1,14 @@
 """SDE Integration schemes.
 
 This module facilitates the implementation of SDE integration schemes according to an ABC contract.
-Similar to the [pysde.increments.BaseRandomIncrement] class, the [pysde.schemes.BaseScheme] class
-assumes basicially nothing about the properties of the integration algorithm, ensuring flexibility
-for a broad range of options. It enforces a simple interface via the [pysde.schemes.BaseScheme.step]
-method. The actual implementation of the user schemes determines their user-friendliness. The
-recommended workflow can be seen in the [pysde.schemes.ExplicitEulerMaruyamaScheme] class. Here,
-the user has to provide drift and diffusion functions only for a single trajectory. Broadcasting
-over trajectories is not necessary. This is taken care of by a jit-compiled, parallel for loop using
+Similar to the [`BaseRandomIncrement`][pysde.increments.BaseRandomIncrement] class, the
+[`BaseScheme`][pysde.schemes.BaseScheme] class assumes basicially nothing about the properties of
+the integration algorithm, ensuring flexibility for a broad range of options. It enforces a simple
+interface via the [`step`][pysde.schemes.BaseScheme.step] method. The actual implementation of the
+user schemes determines their user-friendliness. The recommended workflow can be seen in the
+[`ExplicitEulerMaruyamaScheme`][pysde.schemes.ExplicitEulerMaruyamaScheme] class. Here, the user has
+to provide drift and diffusion functions only for a single trajectory. Broadcasting over
+trajectories is not necessary. This is taken care of by a jit-compiled, parallel for loop using
 `numba`. Other algorithms should follow this pattern, which can be realized by a simple closure
 around the step function.
 
@@ -29,6 +30,7 @@ from beartype import BeartypeConf, BeartypeStrategy, beartype
 from pysde import increments
 
 nobeartype = beartype(conf=BeartypeConf(strategy=BeartypeStrategy.O0))
+"""Decorator to deactivate type checking."""
 
 
 # ==================================================================================================
@@ -55,7 +57,7 @@ class BaseScheme(ABC):
             current_state (npt.NDArray[np.floating]): The current state of the system, in vectorized
                 form $d_X \times N$
             current_time (Real): The current time $t$ of the stochastic process.
-            step_size (Real): Discrete step size $\nabla t$.
+            step_size (Real): Discrete step size $\Delta t$.
 
         Returns:
             npt.NDArray[np.floating]: The updated state of the system, in vectorized form
@@ -77,7 +79,7 @@ class ExplicitEulerMaruyamaScheme(BaseScheme):
     the scheme is given by
 
     $$
-        X_{k+1} = X_k + \mathbf{b}(\mathbf{X}_k,t_k)\nabla t + \mathbf{\Sigma}(X_k,t_k)\Delta W_k.
+        X_{k+1} = X_k + \mathbf{b}(\mathbf{X}_k,t_k)\Delta t + \mathbf{\Sigma}(X_k,t_k)\Delta W_k.
     $$
 
     Methods:
@@ -132,7 +134,7 @@ class ExplicitEulerMaruyamaScheme(BaseScheme):
             current_state (npt.NDArray[np.floating]): The current state of the system, in vectorized
                 form $d_X \times N$.
             current_time (Real): The current time $t$ of the stochastic process.
-            step_size (Real): Discrete step size $\nabla t$.
+            step_size (Real): Discrete step size $\Delta t$.
 
         Returns:
             npt.NDArray[np.floating]: The updated state of the system, in vectorized form

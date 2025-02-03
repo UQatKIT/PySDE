@@ -1,6 +1,6 @@
 """SDE Integrator.
 
-THe SDE integrator stands at the top of the composition hierarchy in PySDE. It is composed of a
+The SDE integrator stands at the top of the composition hierarchy in PySDE. It is composed of a
 scheme and a storage object, and drives the SDE integration process. To stick to the overall design
 goal of simplicity, PySDE only supports integration with constant step size. Due to its modularity,
 however, adaptive schemes can easily implemented with the lower-level components.
@@ -56,7 +56,7 @@ class SDEIntegrator:
             initial_state (Real | npt.NDArray): Initial state of the system, given for all
                 trajectories with shape $d_X \times N$
             initial_time (Real): Initial time $t_0$ of the stochastic process
-            step_size (Real): Discrete step size $\delta t$
+            step_size (Real): Discrete step size $\Delta t$
             num_steps (int): Number of steps to integrate
             progress_bar (bool): Whether to display a progress bar
 
