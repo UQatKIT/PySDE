@@ -6,7 +6,7 @@
 
 # PySDE: A Light-Weight Numerical Integrator for Stochastic Differential Equations
 
-PySDE is a light-weight numerical integrator for stochastic differential equations (SDE). More 
+PySDE is a light-weight numerical integrator for stochastic differential equations (SDEs). More 
 specifically, we consider vector-valued diffusion processes $\mathbf{X}_t$ on $\Omega\in\mathbb{R}^{d_X}$, continuously indexed over time $t\in\mathbb{R}$. PySDE solves corresponding SDEs of the form
 
 $$
@@ -15,7 +15,7 @@ $$
 
  with vector-valued *drift* $\mathbf{b}: \Omega\to\mathbb{R}^{d_X}$, matrix-valued *diffusion* $\mathbf{\Sigma}: \Omega\to\mathbb{R}^{d_x\times d_W}$, and vector valued *Wiener process* $\mathbf{W}_t \in\mathbb{R}^{d_W}$.
 
- PySDE has a modular core, making it easy to combine different components of the integrator or extend them. At the same time, PySDE is just simple: Simple to use, simple to understand. The user can provide drift and diffusion in simple numpy arrays. At the same time, PySDE is tailored towards integration of large ensembles of trajectories. Loops over trajectories are jit-compiled and accelerated with [Numba](https://numba.pydata.org/). We further implement custom data structures that import out-of-memory storage of the results. No need to evaluate statistics online or compromise on data resolution.
+ PySDE has a modular core, making it easy to combine different components of the integrator or extend them. At the same time, PySDE is just simple: Simple to use, simple to understand. The user can provide drift and diffusion as callables in Python or numpy syntax. At the same time, PySDE is tailored towards integration of large ensembles of trajectories. Loops over trajectories are jit-compiled and accelerated with [Numba](https://numba.pydata.org/). We further implement custom data structures that support out-of-memory storage of the results. No need to evaluate statistics online or compromise on data resolution.
 
 
  > The excellent [Diffrax](https://github.com/patrick-kidger/diffrax) library is a more powerful general-purpose library for solving SDEs. PySDE has the goal to be complementary to Diffrax, serving a niche: It is very simple to use, understand, and extend (without knowledge of JAX). Moreover, it is specifically tailored towards large trajectory ensembles on HPC architectures. At some point, PySDE might be come a wrapper to Diffrax, but even that wrapper code would probably be more complex than the current internals of PySDE.

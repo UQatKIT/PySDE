@@ -1,6 +1,6 @@
 # PySDE [<img src="images/uq_logo.png" width="200" height="100" alt="UQ at KIT" align="right">](https://www.scc.kit.edu/forschung/uq.php)
 
-PySDE is a light-weight numerical integrator for stochastic differential equations (SDE). More 
+PySDE is a light-weight numerical integrator for stochastic differential equations (SDEs). More 
 specifically, we consider vector-valued diffusion processes $\mathbf{X}_t$ on $\Omega\in\mathbb{R}^{d_X}$, continuously indexed over time $t\in\mathbb{R}$. PySDE solves corresponding SDEs of the form
 
 $$
@@ -9,7 +9,7 @@ $$
 
 with vector-valued *drift* $\mathbf{b}: \Omega\to\mathbb{R}^{d_X}$, matrix-valued *diffusion* $\mathbf{\Sigma}: \Omega\to\mathbb{R}^{d_x\times d_W}$, and vector valued *Wiener process* $\mathbf{W}_t \in\mathbb{R}^{d_W}$.
 
-PySDE has a modular core, making it easy to combine different components of the integrator or extend them. At the same time, PySDE is just simple: Simple to use, simple to understand. The user can provide drift and diffusion in simple numpy arrays. At the same time, PySDE is tailored towards integration of large ensembles of trajectories. Loops over trajectories are jit-compiled and accelerated with [Numba](https://numba.pydata.org/). We further implement custom data structures that import out-of-memory storage of the results. No need to evaluate statistics online or compromise on data resolution.
+PySDE has a modular core, making it easy to combine different components of the integrator or extend them. At the same time, PySDE is just simple: Simple to use, simple to understand. The user can provide drift and diffusion as callables in Python or numpy syntax. At the same time, PySDE is tailored towards integration of large ensembles of trajectories. Loops over trajectories are jit-compiled and accelerated with [Numba](https://numba.pydata.org/). We further implement custom data structures that support out-of-memory storage of the results. No need to evaluate statistics online or compromise on data resolution.
 
 !!! note "PySDE and Diffrax"
 
@@ -26,7 +26,7 @@ pip install pysde
 To install with MPI support, install with the corresponding extra (MPI needs to be available in the system path),
 ```bash
 pip install pysde[mpi]
- ```
+```
 
 For development, we recommend using the great [uv](https://docs.astral.sh/uv/) project management tool, for which we provide a universal lock file. To set up a reproducible environment, run
 ```bash
