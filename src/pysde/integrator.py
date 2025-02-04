@@ -79,5 +79,4 @@ class SDEIntegrator:
         except BaseException:  # noqa: BLE001
             traceback.print_exc()
         finally:
-            self._storage.save()
             return self._storage  # noqa: B012

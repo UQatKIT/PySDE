@@ -200,3 +200,4 @@ development.ipynb
 # Output files
 *.log
 *.npz
+result*/

@@ -4,8 +4,11 @@ For SDE simulations with large numbers of trajectories and time steps, the resul
 does not fit into RAM. A possible solution is to only store statistics or implement strides. In
 PySDE, we provide a simple option for actually storing all the data, and process it a-posteriori.
 This is realized by data containers that automatically flush data from memory to disk. The data
-storage backend we employ is [Zarr](https://zarr.readthedocs.io/en/stable/), but any other backend can easily be implemented by deriving from
-the [`BaseStorage`][pysde.storages.BaseStorage] class.
+storage backend we employ is [Zarr](https://zarr.readthedocs.io/en/stable/), but any other backend
+can easily be implemented by deriving from the [`BaseStorage`][pysde.storages.BaseStorage] class.
+The base class constructor also ensures MPI thread-safety via the `avoid_race_condition` flag.
+If this option is set, only the root process will create the save directory, and a barrier
+synchronizes all processes before proceeding.
 
 classes:
     BaseStorage: ABC for data storage objects.
@@ -18,12 +21,20 @@ import pathlib
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from numbers import Real
-from typing import Annotated
+from typing import Annotated, Final
 
 import numpy as np
 import numpy.typing as npt
 import zarr
 from beartype.vale import Is
+
+try:
+    from mpi4py import MPI
+
+    MPI_LOADED: Final = True
+    """Check if mpi4py can be loaded for parallel execution."""
+except ImportError:
+    MPI_LOADED: Final = False
 
 
 # ==================================================================================================
@@ -49,6 +60,7 @@ class BaseStorage(ABC):
         self,
         stride: Annotated[int, Is[lambda x: x > 0]],
         save_directory: pathlib.Path | None = None,
+        avoid_race_condition: bool = False,
     ) -> None:
         r"""Initialize storage object with a stride and a save directory.
 
@@ -61,6 +73,7 @@ class BaseStorage(ABC):
         self._save_directory = save_directory
         self._time_list = []
         self._data_list = []
+        self._create_thread_safe_directory(save_directory, avoid_race_condition)
 
     # ----------------------------------------------------------------------------------------------
     def store(
@@ -79,6 +92,21 @@ class BaseStorage(ABC):
         if iteration_number % self._stride == 0:
             self._time_list.append(time)
             self._data_list.append(data)
+
+    # ----------------------------------------------------------------------------------------------
+    def _create_thread_safe_directory(
+        self, save_directory: pathlib.Path | None, avoid_race_condition: bool
+    ) -> None:
+        """Create directory for saving data, potentially in an MPI-safe manner."""
+        if save_directory is not None:
+            if MPI_LOADED and avoid_race_condition:
+                mpi_communicator = MPI.COMM_WORLD
+                local_rank = mpi_communicator.Get_rank()
+                if local_rank == 0:
+                    save_directory.parent.mkdir(parents=True, exist_ok=True)
+                mpi_communicator.Barrier()
+            else:
+                save_directory.parent.mkdir(parents=True, exist_ok=True)
 
     # ----------------------------------------------------------------------------------------------
     @abstractmethod
