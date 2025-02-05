@@ -51,8 +51,8 @@ class IntegratorBuilder:
     @classmethod
     def build_integrator(
         cls,
-        drift_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray],
-        diffusion_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray],
+        drift_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray[np.floating]],
+        diffusion_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray[np.floating]],
         scheme_type: type[schemes.BaseScheme],
         increment_type: type[increments.BaseRandomIncrement],
         storage_type: type[storages.BaseStorage],
@@ -64,9 +64,9 @@ class IntegratorBuilder:
         parameters to initialize the scheme, increment, and storage objects.
 
         Args:
-            drift_function (Callable[[npt.NDArray[np.floating], Real], npt.NDArray]):
+            drift_function (Callable[[npt.NDArray[np.floating], Real], npt.NDArray[np.floating]]):
                 Drift function of the SDE (c.f. [`schemes`][pysde.schemes])
-            diffusion_function (Callable[[npt.NDArray[np.floating], Real], npt.NDArray]):
+            diffusion_function (Callable[[npt.NDArray[np.floating], Real], npt.NDArray[np.floating]]):
                 Diffusion function of the SDE (c.f. [`schemes`][pysde.schemes])
             scheme_type (type[schemes.BaseScheme]): Type of the integration scheme
             increment_type (type[increments.BaseRandomIncrement]): Type of the random increment
@@ -141,8 +141,8 @@ class ParallelRunner:
     # ----------------------------------------------------------------------------------------------
     def __init__(
         self,
-        drift_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray],
-        diffusion_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray],
+        drift_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray[np.floating]],
+        diffusion_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray[np.floating]],
         scheme_type: type[schemes.BaseScheme],
         increment_type: type[increments.BaseRandomIncrement],
         storage_type: type[storages.BaseStorage],
@@ -151,9 +151,9 @@ class ParallelRunner:
         """Initialize the parallel runner.
 
         Args:
-            drift_function (Callable[[npt.NDArray[np.floating], Real], npt.NDArray]):
+            drift_function (Callable[[npt.NDArray[np.floating], Real], npt.NDArray[np.floating]]):
                 Drift function of the SDE (c.f. [`schemes`][pysde.schemes])
-            diffusion_function (Callable[[npt.NDArray[np.floating], Real], npt.NDArray]):
+            diffusion_function (Callable[[npt.NDArray[np.floating], Real], npt.NDArray[np.floating]]):
                 Diffusion function of the SDE (c.f. [`schemes`][pysde.schemes])
             scheme_type (type[schemes.BaseScheme]): Type of the integration scheme
             increment_type (type[increments.BaseRandomIncrement]): Type of the random increment
@@ -176,7 +176,7 @@ class ParallelRunner:
     # ----------------------------------------------------------------------------------------------
     def run(
         self,
-        initial_state: Real | npt.NDArray,
+        initial_state: Real | npt.NDArray[np.floating],
         initial_time: Real,
         step_size: Real,
         num_steps: Annotated[int, Is[lambda x: x > 0]],
@@ -185,8 +185,8 @@ class ParallelRunner:
         r"""Run the SDE integration process, return storage object on given MPI rank.
 
         Args:
-            initial_state (Real | npt.NDArray): Initial state of the system, given for all
-                trajectories with shape $d_X \times N$
+            initial_state (Real | npt.NDArray[np.floating]): Initial state of the system, given for
+                all trajectories with shape $d_X \times N$
             initial_time (Real): Initial time $t_0$ of the stochastic process
             step_size (Real): Discrete step size $\Delta t$
             num_steps (int): Number of steps to integrate

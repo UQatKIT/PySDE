@@ -54,8 +54,8 @@ class BaseScheme(ABC):
         r"""Implement a single step in the integration scheme.
 
         Args:
-            current_state (npt.NDArray[np.floating]): The current state of the system, in vectorized
-                form $d_X \times N$
+            current_state (npt.NDArray[np.floating]): The current state of the system,
+                in vectorized form $d_X \times N$
             current_time (Real): The current time $t$ of the stochastic process.
             step_size (Real): Discrete step size $\Delta t$.
 
@@ -89,8 +89,8 @@ class ExplicitEulerMaruyamaScheme(BaseScheme):
     # ----------------------------------------------------------------------------------------------
     def __init__(
         self,
-        drift_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray],
-        diffusion_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray],
+        drift_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray[np.floating]],
+        diffusion_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray[np.floating]],
         random_increment: increments.BaseRandomIncrement,
     ) -> None:
         r"""Initialize scheme with drift, diffusion, and Brownian increment.
@@ -105,9 +105,9 @@ class ExplicitEulerMaruyamaScheme(BaseScheme):
             not as lambda functions.
 
         Args:
-            drift_function (Callable[[npt.NDArray[np.floating], Real], npt.NDArray]):
+            drift_function (Callable[[npt.NDArray[np.floating], Real], npt.NDArray[np.floating]]):
                 Callable representing the drift function $\mathbf{b}(\mathbf{X}_t,t)$.
-            diffusion_function (Callable[[npt.NDArray[np.floating], Real], npt.NDArray]):
+            diffusion_function (Callable[[npt.NDArray[np.floating], Real], npt.NDArray[np.floating]]):
                 Callable representing the diffusion function $\mathbf{\Sigma}(\mathbf{X}_t,t)$.
             random_increment (increments.BaseRandomIncrement):
                 [BaseRandomIncrement][pysde.increments.BaseRandomIncrement] to approximate the
@@ -131,17 +131,19 @@ class ExplicitEulerMaruyamaScheme(BaseScheme):
         over trajectories. in numba.
 
         Args:
-            current_state (npt.NDArray[np.floating]): The current state of the system, in vectorized
-                form $d_X \times N$.
+            current_state (npt.NDArray[np.floating]): The current state of the system,
+                in vectorized form $d_X \times N$.
             current_time (Real): The current time $t$ of the stochastic process.
             step_size (Real): Discrete step size $\Delta t$.
 
         Returns:
-            npt.NDArray[np.floating]: The updated state of the system, in vectorized form
-                $d_X \times N$.
+            npt.NDArray[np.floating]: The updated state of the system, in vectorized
+                form $d_X \times N$.
         """
         dimension, num_trajectories = current_state.shape
-        vectorized_increment = self._random_increment.sample(dimension, num_trajectories, step_size)
+        vectorized_increment = self._random_increment.sample(
+            dimension, num_trajectories, step_size, dtype=current_state.dtype
+        )
         vectorized_step = self._jitted_step(
             current_state,
             current_time,
@@ -159,8 +161,8 @@ class ExplicitEulerMaruyamaScheme(BaseScheme):
         current_state: npt.NDArray[np.floating],
         current_time: Real,
         step_size: Real,
-        drift_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray],
-        diffusion_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray],
+        drift_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray[np.floating]],
+        diffusion_function: Callable[[npt.NDArray[np.floating], Real], npt.NDArray[np.floating]],
         vectorized_increment: npt.NDArray[np.floating],
     ) -> npt.NDArray[np.floating]:
         """Numba jittable step function for thread-parallel loop over trajectories.

@@ -44,7 +44,7 @@ class SDEIntegrator:
     # ----------------------------------------------------------------------------------------------
     def run(
         self,
-        initial_state: Real | npt.NDArray,
+        initial_state: Real | npt.NDArray[np.floating],
         initial_time: Real,
         step_size: Real,
         num_steps: Annotated[int, Is[lambda x: x > 0]],
@@ -53,8 +53,8 @@ class SDEIntegrator:
         r"""Run the integration process.
 
         Args:
-            initial_state (Real | npt.NDArray): Initial state of the system, given for all
-                trajectories with shape $d_X \times N$
+            initial_state (Real | npt.NDArray[np.floating]): Initial state of the system, given for
+                all trajectories with shape $d_X \times N$
             initial_time (Real): Initial time $t_0$ of the stochastic process
             step_size (Real): Discrete step size $\Delta t$
             num_steps (int): Number of steps to integrate

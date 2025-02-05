@@ -68,6 +68,8 @@ class BaseStorage(ABC):
             stride (int): Stride for saving every $n-th$ sample
             save_directory (pathlib.Path | None, optional): Path to save data to, on manual call or
                 potentially automatically. Defaults to None.
+            avoid_race_condition (bool, optional): Ensure MPI thread safety. Makes only process 0
+                create a common directory to store results in. Defaults to False.
         """
         self._stride = stride
         self._save_directory = save_directory
@@ -156,7 +158,9 @@ class NumpyStorage(BaseStorage):
 
     # ----------------------------------------------------------------------------------------------
     @property
-    def values(self) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]:
+    def values(
+        self,
+    ) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]:
         """Stack internal lists to numpy arrays and return time and trajectory arrays.
 
         For $M$ saved snapshots, return time array of shape $(M,)$ and data array of shape
@@ -260,7 +264,9 @@ class ZarrStorage(BaseStorage):
 
     # ----------------------------------------------------------------------------------------------
     def _init_storage_and_fill(
-        self, time_array: npt.NDArray[np.floating], data_array: npt.NDArray[np.floating]
+        self,
+        time_array: npt.NDArray[np.floating],
+        data_array: npt.NDArray[np.floating],
     ) -> None:
         """Init Zarr storage and fill with initial time and trajectory data."""
         self._zarr_storage_group = zarr.group(store=self._save_directory, overwrite=True)

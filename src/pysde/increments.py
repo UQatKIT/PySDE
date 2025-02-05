@@ -51,6 +51,7 @@ class BaseRandomIncrement(ABC):
         _dimension: Annotated[int, Is[lambda x: x > 0]],
         _num_trajectories: Annotated[int, Is[lambda x: x > 0]],
         _step_size: Real,
+        _dtype: np.float32 | np.float64,
     ) -> object:
         r"""Generate a random increment.
 
@@ -58,11 +59,17 @@ class BaseRandomIncrement(ABC):
         the number of trajectories $N$. Generation of the random increment has to be vectorized over
         $N$.
 
+        !!! note "Make sure to use the right dtype"
+            For the SDE sample to be floating point agnostic, the `sample` method in all derived
+            classes needs to return arrays of the correct dtype, as provided through the function
+            argument.
+
         Args:
             _dimension (int): Physical dimension $d_W$ of the increment
             _num_trajectories (int): Number of trajectories $N$
             _step_size (Real): Discrete step size $\nabla t$ of the integrator
-
+            _dtype (np.float32 | np.float64): Data type of the random increment, can be 32 or 64
+                bits
         Raises:
             NotImplementedError: Exception indicating that the method needs to be implemented in
                 derived classes.
@@ -88,6 +95,7 @@ class BrownianIncrement(BaseRandomIncrement):
         dimension: Annotated[int, Is[lambda x: x > 0]],
         num_trajectories: Annotated[int, Is[lambda x: x > 0]],
         step_size: Real,
+        dtype: object,
     ) -> npt.NDArray[np.floating]:
         r"""Generate a random increment $dW_t$.
 
@@ -95,8 +103,11 @@ class BrownianIncrement(BaseRandomIncrement):
             dimension (int): Physical dimension $d_W$ of the increment
             num_trajectories (int): Number of trajectories $N$
             step_size (Real): Discrete step size $\nabla t$ of the integrator
-
+            dtype (np.float32 | np.float64): Data type of the random increment, can be 32 or 64 bits
         Returns:
             npt.NDArray[np.floating]: Sample of dimension $d_W\times N$
         """
-        return np.sqrt(np.abs(step_size)) * self._rng.standard_normal((dimension, num_trajectories))
+        increment = np.sqrt(np.abs(step_size), dtype=dtype) * self._rng.standard_normal(
+            size=(dimension, num_trajectories), dtype=dtype
+        )
+        return increment
