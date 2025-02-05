@@ -6,6 +6,10 @@
 
 # PySDE: A Light-Weight Numerical Integrator for Stochastic Differential Equations
 
+> [!IMPORTANT]
+> PySDE is a library developed in the course of a research project, not as a dedicated tool. As
+ such, it has been tested for a number of example use cases, but not with an exhaustive test suite. Therefore, we currently do not intend to upload this library to a public index.
+
 PySDE is a light-weight numerical integrator for stochastic differential equations (SDEs). More 
 specifically, we consider vector-valued diffusion processes $\mathbf{X}_t$ on $\Omega\in\mathbb{R}^{d_X}$, continuously indexed over time $t\in\mathbb{R}$. PySDE solves corresponding SDEs of the form
 

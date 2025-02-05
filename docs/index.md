@@ -15,10 +15,14 @@ PySDE has a modular core, making it easy to combine different components of the 
 
     The excellent [Diffrax](https://github.com/patrick-kidger/diffrax) library is a more powerful general-purpose library for solving SDEs. PySDE has the goal to be complementary to Diffrax, serving a niche: It is very simple to use, understand, and extend (without knowledge of JAX). Moreover, it is specifically tailored towards large trajectory ensembles on HPC architectures. At some point, PySDE might be come a wrapper to Diffrax, but even that wrapper code would probably be more complex than the current internals of PySDE.
 
+!!! warning
+    PySDE is a library developed in the course of a research project, not as a dedicated tool. As
+    such, it has been tested for a number of example use cases, but not with an exhaustive test suite. Therefore, we currently do not intend to upload this library to a public index.
+
 
 ## Installation
 
-PySDE can be installed via pip,
+PySDE can be installed via pip in the project root directory,
 ```bash
 pip install pysde
 ```
