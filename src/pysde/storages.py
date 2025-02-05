@@ -247,8 +247,9 @@ class ZarrStorage(BaseStorage):
             ValueError: Checks that internal storage has been initialized. This is done
                 automatically when the first chunk of data is flushed to disk.
         """
-        if (self._zarr_storage_times is None) or (self._zarr_storage_data is None):
+        if (self._zarr_storage_time is None) or (self._zarr_storage_data is None):
             raise ValueError("No data has been saved to disk yet.")
+        self.save()
         return self._zarr_storage_time, self._zarr_storage_data
 
     # ----------------------------------------------------------------------------------------------
@@ -256,11 +257,11 @@ class ZarrStorage(BaseStorage):
         """Stack internal lists to numpy arrays and save to Zarr storages on disk."""
         time_array = np.stack(self._time_list, axis=-1)
         data_array = np.stack(self._data_list, axis=-1)
-        if (self._zarr_storage_times is None) or (self._zarr_storage_data is None):
+        if (self._zarr_storage_time is None) or (self._zarr_storage_data is None):
             self._init_storage_and_fill(time_array, data_array)
         else:
             self._zarr_storage_time.append(time_array, axis=0)
-            self._zarr_storage_data.append(data_array, axis=0)
+            self._zarr_storage_data.append(data_array, axis=2)
 
     # ----------------------------------------------------------------------------------------------
     def _init_storage_and_fill(

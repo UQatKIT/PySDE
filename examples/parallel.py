@@ -1,6 +1,6 @@
 # ==================================================================================================
 # Run with:
-# mpirun -n <NUM_RPOCS> --map-by slot:PE=<NUM_THREADS_PER_PROC> python -m mpi4py parallels.py
+# mpirun -n <NUM_RPOCS> --map-by slot:PE=<NUM_THREADS_PER_PROC> python -m mpi4py parallel.py
 # ==================================================================================================
 
 
@@ -32,9 +32,10 @@ sde_runner = runner.ParallelRunner(
     diffusion_function=diffusion,
     scheme_type=schemes.ExplicitEulerMaruyamaScheme,
     increment_type=increments.BrownianIncrement,
-    storage_type=storages.NumpyStorage,
+    storage_type=storages.ZarrStorage,
     seed=0,
-    stride=100,
+    stride=1,
+    chunk_size=50,
     save_directory=Path("../results_example_parallel/result"),
     avoid_race_condition=True,
 )
