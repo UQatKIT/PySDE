@@ -42,10 +42,4 @@ uv sync --all-groups
 
 ## Documentation
 
-Check out the [documentation](https://uqatkit.github.io/PySDE/) for further information regarding usage and API. We also provide runnable [`examples`](https://github.com/UQatKIT/PySDE/tree/main/examples).
-
-
-## Acknowledgement and License
-
-PySDE is being developed in the research group [Uncertainty Quantification](https://www.scc.kit.edu/forschung/uq.php) at KIT.
-It is distributed as free software under the [MIT License](https://choosealicense.com/licenses/mit/).
+Check out the [documentation](https://maximilian-kruse.github.io/PySDE/) for further information regarding usage and API. We also provide runnable [`examples`](https://github.com/maximilian-kruse/PySDE/tree/main/examples).

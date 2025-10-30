@@ -1,4 +1,4 @@
-# PySDE [<img src="images/uq_logo.png" width="200" height="100" alt="UQ at KIT" align="right">](https://www.scc.kit.edu/forschung/uq.php)
+# PySDE
 
 PySDE is a light-weight numerical integrator for stochastic differential equations (SDEs). More 
 specifically, we consider vector-valued diffusion processes $\mathbf{X}_t$ on $\Omega\in\mathbb{R}^{d_X}$, continuously indexed over time $t\in\mathbb{R}$. PySDE solves corresponding SDEs of the form
@@ -40,9 +40,3 @@ uv sync --all-groups
 ## Documentation
 
 Under **Usage**, we provide examples of the different ways in which PySDE can be used to integrate SDEs. The **API reference** gives a more detailed overview of the different software components and their internals.
-
-
-## Acknowledgement and License
-
-PySDE is being developed in the research group [Uncertainty Quantification](https://www.scc.kit.edu/forschung/uq.php) at KIT.
-It is distributed as free software under the [MIT License](https://choosealicense.com/licenses/mit/).
