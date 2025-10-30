@@ -1,6 +1,6 @@
 [project]
-authors = [{ name = "Maximilian Kruse", email = "maximilian.kruse@kit.edu" }]
-maintainers = [{ name = "Maximilian Kruse", email = "maximilian.kruse@kit.edu" }]
+authors = [{ name = "Maximilian Kruse", email = "maxkruse1604@gmail.com" }]
+maintainers = [{ name = "Maximilian Kruse", email = "maxkruse1604@gmail.com" }]
 name = "pysde"
 description = "Light-weight numerical integrator for stochastic differential equations"
 readme = "README.md"
