@@ -6,7 +6,7 @@ docs_dir: docs/
 site_name: PySDE
 site_author: Maximilian Kruse
 site_description: A Light-weight numerical integrator for stochastic differential equations
-repo_url: https://github.com/UQatKIT/PySDE
+repo_url: https://github.com/maximilian-kruse/PySDE
 repo_name: PySDE
 
 # -- Material theme configuration ------------------------------------------------------------------

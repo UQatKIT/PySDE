@@ -15,7 +15,7 @@ classifiers = [
   "Intended Audience :: Science/Research",
   "License :: OSI Approved :: MIT License",
 ]
-urls = { repository = "https://github.com/UQatKIT/PySDE", documentation = "https://uqatkit.github.io/PySDE/"  }
+urls = { repository = "https://github.com/maximilian-kruse/PySDE", documentation = "https://maximilian-kruse.github.io/PySDE/"  }
 
 # --------------------------------------------------------------------------------------------------
 dependencies = [
